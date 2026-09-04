@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import './style.css';
 
 const scene = new THREE.Scene();
@@ -105,11 +105,11 @@ const interactables = [];
 interactables.push(makeDesk(), makeComputer(), makeChair());
 const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
-const loader = new GLTFLoader();
+const loader = new ColladaLoader();
 const assets = [
-  { url: '/models/arcade-game.glb', name: 'ARCADE GAME', pos: [2.5,.38,-2.65], scale: 2.3, rot: -.18 },
-  { url: '/models/monkey-crab-cushion.glb', name: 'MONKEY-CRAB CUSHION', pos: [-3.75,.36,2.45], scale: 2.4, rot: .35 },
-  { url: '/models/buckets.glb', name: 'BLUE / RED BUCKETS', pos: [.55,.05,1.45], scale: 1.6, rot: -.6 }
+  { url: '/models/couch/Obj_Sofa.dae', name: 'COUCH', pos: [-.65,.03,2.25], scale: 4.4, rot: Math.PI * .92 },
+  { url: '/models/tv/Obj_StaffRollTV.dae', name: 'STAFF CREDITS TV', pos: [2.65,.39,-2.65], scale: 2.9, rot: -.08 },
+  { url: '/models/music-selector/Obj_LobbyMusicSelecter.dae', name: 'LOBBY MUSIC SELECTOR', pos: [4.5,.03,-1.7], scale: 2.2, rot: -.42 }
 ];
 
 function fitAndPlace(object, item) {
@@ -126,8 +126,8 @@ function fitAndPlace(object, item) {
 }
 
 let loaded = 0;
-assets.forEach(item => loader.load(item.url, gltf => {
-  fitAndPlace(gltf.scene, item);
+assets.forEach(item => loader.load(item.url, collada => {
+  fitAndPlace(collada.scene, item);
   loaded++; loadBar.style.width = `${loaded / assets.length * 100}%`;
   if (loaded === assets.length) setTimeout(() => document.querySelector('.loader').classList.add('done'), 350);
 }, undefined, error => { console.error(item.name, error); loaded++; }));
