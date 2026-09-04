@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap');
 
-:root { font-family: "Space Mono", monospace; color: #f7f5ed; background: #120f1c; }
+:root { font-family: "Space Mono", monospace; color: #f7f5ed; background: #14051f; }
 * { box-sizing: border-box; }
 html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; }
 canvas { display: block; }
@@ -8,23 +8,23 @@ canvas { display: block; }
 .hud { position: fixed; top: 0; left: 0; right: 0; padding: 28px 34px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
 .brand { font-family: "Archivo Black", sans-serif; font-size: 20px; transform: rotate(-3deg); }
 .brand span { background: #f7f5ed; color: #171320; padding: 7px 9px; }
-.brand strong { background: #d8ff22; color: #171320; padding: 7px 8px; }
+.brand strong { background: #ceb121; color: #171320; padding: 7px 8px; }
 .status { color: #bdb7c8; font-size: 10px; letter-spacing: .16em; }
-.status i { display: inline-block; width: 7px; height: 7px; margin-right: 9px; background: #d8ff22; border-radius: 50%; box-shadow: 0 0 14px #d8ff22; }
+.status i { display: inline-block; width: 7px; height: 7px; margin-right: 9px; background: #ceb121; border-radius: 50%; box-shadow: 0 0 14px #ceb121; }
 .intro { position: fixed; left: 7vw; top: 50%; width: 370px; transform: translateY(-48%); z-index: 5; transition: opacity .55s, transform .55s; }
 .intro.hidden { opacity: 0; transform: translate(-40px, -48%); pointer-events: none; }
-.eyebrow { color: #d8ff22; font-weight: 700; font-size: 11px; letter-spacing: .18em; }
+.eyebrow { color: #ceb121; font-weight: 700; font-size: 11px; letter-spacing: .18em; }
 h1 { margin: 8px 0 18px; font: 70px/.88 "Archivo Black", sans-serif; letter-spacing: -.06em; text-transform: uppercase; text-shadow: 5px 5px 0 #292036; }
-h1 em { color: #ff4dc4; font-style: normal; -webkit-text-stroke: 1px #fff; }
+h1 em { color: #9025c6; font-style: normal; -webkit-text-stroke: 1px #fff; }
 .lede { color: #bdb7c8; font-size: 12px; line-height: 1.8; max-width: 330px; }
-button { margin-top: 22px; border: 0; color: #171320; background: #d8ff22; padding: 15px 18px; font: 700 12px "Space Mono"; letter-spacing: .08em; cursor: pointer; box-shadow: 5px 5px 0 #ff4dc4; transition: transform .2s; }
+button { margin-top: 22px; border: 0; color: #171320; background: #ceb121; padding: 15px 18px; font: 700 12px "Space Mono"; letter-spacing: .08em; cursor: pointer; box-shadow: 5px 5px 0 #9025c6; transition: transform .2s; }
 button:hover { transform: translate(-2px, -2px); }
 button span { margin-left: 28px; }
 .controls { position: fixed; right: 32px; bottom: 26px; z-index: 5; color: #938c9e; font-size: 9px; letter-spacing: .12em; }
-.asset-tag { position: fixed; z-index: 6; pointer-events: none; display: none; color: #171320; background: #f7f5ed; padding: 7px 10px; font-size: 10px; font-weight: 700; box-shadow: 3px 3px 0 #ff4dc4; }
-.loader { position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; gap: 15px; background: #120f1c; transition: opacity .6s, visibility .6s; }
+.asset-tag { position: fixed; z-index: 6; pointer-events: none; display: none; color: #171320; background: #f7f5ed; padding: 7px 10px; font-size: 10px; font-weight: 700; box-shadow: 3px 3px 0 #9025c6; }
+.loader { position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; gap: 15px; background: #14051f; transition: opacity .6s, visibility .6s; }
 .loader.done { opacity: 0; visibility: hidden; }
 .loader b { font-size: 11px; letter-spacing: .2em; }
 .loader span { width: 240px; height: 5px; background: #30283e; }
-.loader i { display: block; width: 8%; height: 100%; background: #d8ff22; transition: width .25s; }
+.loader i { display: block; width: 8%; height: 100%; background: #ceb121; transition: width .25s; }
 @media (max-width: 720px) { .intro { left: 24px; top: auto; bottom: 70px; transform: none; width: calc(100% - 48px); } .intro.hidden { transform: translateY(25px); } h1 { font-size: 48px; } .lede { display: none; } .hud { padding: 22px; } .controls { right: 20px; bottom: 18px; } }
