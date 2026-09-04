@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import './style.css';
 
 const scene = new THREE.Scene();
@@ -8,7 +8,7 @@ scene.background = new THREE.Color(0x14051f);
 scene.fog = new THREE.Fog(0x14051f, 13, 29);
 
 const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 80);
-camera.position.set(10.8, 7.2, 12.8);
+camera.position.set(3.0, 7.2, 14.2);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
@@ -21,7 +21,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.querySelector('#app').appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(1.2, 2.2, 0);
+controls.target.set(3.0, 2.2, -0.8);
 controls.enableDamping = true;
 controls.minDistance = 7;
 controls.maxDistance = 22;
@@ -42,14 +42,6 @@ function box(size, position, material) {
 box([12, .28, 9], [0, -.14, 0], floorMat);
 box([12, 6.5, .25], [0, 3.1, -4.45], wallMat);
 box([.25, 6.5, 9], [-5.9, 3.1, 0], wallMat);
-// Stylized ink pools anchor the imported props without pretending to be game assets.
-const yellowInk = new THREE.MeshStandardMaterial({ color: YELLOW, roughness: .28, metalness: .04 });
-const purpleInk = new THREE.MeshStandardMaterial({ color: PURPLE, roughness: .28, metalness: .04 });
-for (const [x,z,s,material] of [[2.4,-2.5,1.45,purpleInk],[-3.7,2.45,1.1,yellowInk],[.5,1.5,.7,purpleInk],[-2.2,-2.25,1.25,yellowInk]]) {
-  const pool = new THREE.Mesh(new THREE.CircleGeometry(s, 11), material);
-  pool.rotation.x = -Math.PI/2; pool.position.set(x,.025,z); room.add(pool);
-}
-
 scene.add(new THREE.HemisphereLight(0xb7c9ff, 0x32223e, 2.2));
 const key = new THREE.DirectionalLight(0xffffff, 3.1); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
 const purpleLight = new THREE.PointLight(PURPLE, 24, 10); purpleLight.position.set(-4, 3.5, 2); scene.add(purpleLight);
@@ -58,24 +50,47 @@ const yellowLight = new THREE.PointLight(YELLOW, 22, 9); yellowLight.position.se
 const interactables = [];
 const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
-const loader = new ColladaLoader();
+const loader = new FBXLoader();
 const assets = [
-  { url: '/models/couch/Obj_Sofa.dae', name: 'COUCH', pos: [-.65,.03,2.25], scale: 4.4, rot: Math.PI * .92 },
-  { url: '/models/tv/Obj_StaffRollTV.dae', name: 'STAFF CREDITS TV', pos: [2.65,.03,-2.65], scale: 2.9, rot: -.08 },
-  { url: '/models/music-selector/Obj_LobbyMusicSelecter.dae', name: 'LOBBY MUSIC SELECTOR', pos: [4.5,.03,-1.7], scale: 2.2, rot: -.42 }
+  { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true },
+  { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI }
 ];
 
 function fitAndPlace(object, item) {
-  const bounds = new THREE.Box3().setFromObject(object);
+  let bounds = new THREE.Box3().setFromObject(object);
   const size = bounds.getSize(new THREE.Vector3());
-  const center = bounds.getCenter(new THREE.Vector3());
   const factor = item.scale / Math.max(size.x, size.y, size.z);
   // Preserve unit conversion already applied by format loaders (DAE commonly uses 0.01).
   object.scale.multiplyScalar(factor);
-  object.position.set(-center.x * factor + item.pos[0], -bounds.min.y * factor + item.pos[1], -center.z * factor + item.pos[2]);
   object.rotation.y = item.rot;
+  object.updateMatrixWorld(true);
+  bounds = new THREE.Box3().setFromObject(object);
+  const center = bounds.getCenter(new THREE.Vector3());
+  object.position.add(new THREE.Vector3(item.pos[0] - center.x, item.pos[1] - bounds.min.y, item.pos[2] - center.z));
+  object.updateMatrixWorld(true);
+  if (item.againstBackWall) {
+    bounds.setFromObject(object);
+    object.position.z += -5.5 - bounds.min.z;
+    object.updateMatrixWorld(true);
+  }
   object.userData.label = item.name;
-  object.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; child.userData.root = object; } });
+  object.traverse(child => {
+    if (!child.isMesh) return;
+    child.castShadow = true;
+    child.receiveShadow = true;
+    child.userData.root = object;
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    for (const material of materials) {
+      if (!material) continue;
+      material.transparent = false;
+      material.opacity = 1;
+      material.alphaTest = 0;
+      material.depthTest = true;
+      material.depthWrite = true;
+      material.side = THREE.FrontSide;
+      material.needsUpdate = true;
+    }
+  });
   scene.add(object); interactables.push(object);
 }
 
@@ -85,8 +100,8 @@ function finishAssetLoad() {
   loadBar.style.width = `${loaded / assets.length * 100}%`;
   if (loaded === assets.length) setTimeout(() => document.querySelector('.loader').classList.add('done'), 350);
 }
-assets.forEach(item => loader.load(item.url, collada => {
-  fitAndPlace(collada.scene, item);
+assets.forEach(item => loader.load(item.url, object => {
+  fitAndPlace(object, item);
   finishAssetLoad();
 }, undefined, error => { console.error(`Could not load ${item.name}`, error); finishAssetLoad(); }));
 
