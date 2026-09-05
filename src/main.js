@@ -6,8 +6,8 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import './style.css';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x14051f);
-scene.fog = new THREE.Fog(0x14051f, 13, 29);
+scene.background = new THREE.Color(0xccc5cb);
+scene.fog = new THREE.Fog(0xccc5cb, 15, 32);
 
 const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 80);
 camera.position.set(3.0, 7.2, 14.2);
@@ -17,7 +17,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = .78;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.querySelector('#app').appendChild(renderer.domElement);
@@ -33,10 +33,10 @@ controls.autoRotateSpeed = 0.42;
 
 const room = new THREE.Group();
 scene.add(room);
-const YELLOW = 0xceb121;
-const PURPLE = 0x9025c6;
-const wallMat = new THREE.MeshStandardMaterial({ color: 0x29143a, roughness: .92 });
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x51485a, roughness: .78 });
+const YELLOW = 0xeee7dc;
+const PURPLE = 0x9b899d;
+const wallMat = new THREE.MeshStandardMaterial({ color: 0xb2a5b4, roughness: .92 });
+const floorMat = new THREE.MeshStandardMaterial({ color: 0xd6cfc4, roughness: .82 });
 function box(size, position, material) {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
   mesh.position.set(...position); mesh.receiveShadow = true; mesh.castShadow = true; room.add(mesh); return mesh;
@@ -49,11 +49,11 @@ function makeWindow() {
   const windowGroup = new THREE.Group();
   windowGroup.position.set(-1.9, 4.0, -4.29);
   windowGroup.userData.label = 'NIGHT WINDOW';
-  const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x16111d, roughness: .42, metalness: .35 });
+  const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x67596b, roughness: .5, metalness: .16 });
   const glassMaterial = new THREE.MeshStandardMaterial({
-    color: 0x17305c,
-    emissive: 0x112b67,
-    emissiveIntensity: 1.25,
+    color: 0x8e8491,
+    emissive: 0x665a6d,
+    emissiveIntensity: .07,
     roughness: .18,
     metalness: .25
   });
@@ -85,9 +85,9 @@ function makeDesk() {
   desk.rotation.y = Math.PI / 2;
   desk.scale.set(1.25, 1.05, 1.7);
   desk.userData.label = 'EMPTY DESK';
-  const wood = new THREE.MeshStandardMaterial({ color: 0xb96b38, roughness: .62 });
-  const edge = new THREE.MeshStandardMaterial({ color: 0x3a213c, roughness: .5, metalness: .12 });
-  const accent = new THREE.MeshStandardMaterial({ color: 0xd3b62c, roughness: .42, metalness: .16 });
+  const wood = new THREE.MeshStandardMaterial({ color: 0xb99d83, roughness: .7 });
+  const edge = new THREE.MeshStandardMaterial({ color: 0xeee8e2, roughness: .66, metalness: .03 });
+  const accent = new THREE.MeshStandardMaterial({ color: 0x9b7e65, roughness: .54, metalness: .04 });
 
   function deskPart(geometry, material, position) {
     const mesh = new THREE.Mesh(geometry, material);
@@ -101,12 +101,12 @@ function makeDesk() {
 
   deskPart(new RoundedBoxGeometry(3.7, .26, 1.45, 4, .11), wood, [0, 1.72, 0]);
   deskPart(new RoundedBoxGeometry(3.78, .09, 1.5, 3, .04), accent, [0, 1.84, 0]);
-  deskPart(new RoundedBoxGeometry(.72, 1.55, 1.28, 4, .1), edge, [-1.35, .82, 0]);
+  deskPart(new RoundedBoxGeometry(.9, 1.55, 1.28, 4, .1), edge, [-1.35, .82, 0]);
   deskPart(new RoundedBoxGeometry(.15, 1.57, .16, 3, .05), edge, [1.5, .81, -.48]);
   deskPart(new RoundedBoxGeometry(.15, 1.57, .16, 3, .05), edge, [1.5, .81, .48]);
 
   for (const y of [.45, .82, 1.19]) {
-    deskPart(new RoundedBoxGeometry(.57, .27, 1.31, 3, .06), new THREE.MeshStandardMaterial({ color: 0x4d2b50, roughness: .58 }), [-1.35, y, .02]);
+    deskPart(new RoundedBoxGeometry(.6, .32, 1.31, 3, .06), new THREE.MeshStandardMaterial({ color: 0xeee8e2, roughness: .66 }), [-1.35, y, .02]);
     deskPart(new THREE.BoxGeometry(.08, .045, .28), accent, [-.96, y, .02]);
   }
 
@@ -114,11 +114,11 @@ function makeDesk() {
   return desk;
 }
 
-scene.add(new THREE.HemisphereLight(0xb7c9ff, 0x32223e, 2.2));
-const key = new THREE.DirectionalLight(0xffffff, 3.1); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
-const purpleLight = new THREE.PointLight(PURPLE, 24, 10); purpleLight.position.set(-4, 3.5, 2); scene.add(purpleLight);
-const yellowLight = new THREE.PointLight(YELLOW, 22, 9); yellowLight.position.set(3, 3, -3); scene.add(yellowLight);
-const windowGlow = new THREE.PointLight(0x477dff, 7, 5); windowGlow.position.set(-1.55, 3.3, -3.8); scene.add(windowGlow);
+scene.add(new THREE.HemisphereLight(0xf5efe8, 0x887f87, 1.55));
+const key = new THREE.DirectionalLight(0xfff2df, 1.9); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
+const purpleLight = new THREE.PointLight(PURPLE, 4.5, 10); purpleLight.position.set(-4, 3.5, 2); scene.add(purpleLight);
+const yellowLight = new THREE.PointLight(YELLOW, 5, 9); yellowLight.position.set(3, 3, -3); scene.add(yellowLight);
+const windowGlow = new THREE.PointLight(0xb4a8b9, 1.8, 5); windowGlow.position.set(-1.55, 3.3, -3.8); scene.add(windowGlow);
 
 const interactables = [];
 interactables.push(makeWindow());
@@ -128,11 +128,12 @@ const loadBar = document.querySelector('.loader i');
 const fbxLoader = new FBXLoader();
 const gltfLoader = new GLTFLoader();
 const assets = [
-  { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true },
-  { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI },
+  { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true, style: 'sofa' },
+  { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI, style: 'tv' },
   { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
   { url: '/models/sea-cucumber-phone/Fig_NamacoPhone.fbx', name: 'SEA-CUCUMBER PHONE', pos: [-5.05,1.95,0], scale: .68, rot: Math.PI * 2.7 },
-  { url: '/models/haikara-magazine.glb', name: 'HAIKARAWALKER MAGAZINE', pos: [-4.5,1.8,-2.9], scale: 1.1, rot: .9, rotX: Math.PI * 1.556 , format: 'glb' }
+  { url: '/models/haikara-magazine.glb', name: 'HAIKARAWALKER MAGAZINE', pos: [-4.5,1.8,-2.9], scale: 1.1, rot: .9, rotX: Math.PI * 1.556 , format: 'glb' },
+  { url: '/models/tall-coffee-to-go.glb', name: 'TALL COFFEE TO GO', pos: [-5.3,1.95,-2.5], scale: .62, rot: .4, format: 'glb' }
 ];
 
 function fitAndPlace(object, item) {
@@ -167,6 +168,53 @@ function fitAndPlace(object, item) {
     const materials = Array.isArray(child.material) ? child.material : [child.material];
     for (const material of materials) {
       if (!material) continue;
+      const materialName = material.name.toLowerCase();
+      if (item.style === 'sofa') {
+        if (materialName.includes('sofa')) {
+          // The couch atlas contains both fabric and wooden arms. Use the
+          // original gold pixels as a mask so each surface gets its own color.
+          material.color.set(0xffffff);
+          material.onBeforeCompile = shader => {
+            shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <map_fragment>',
+              `#ifdef USE_MAP
+                vec4 sofaTexel = texture2D(map, vMapUv);
+                float woodMask = smoothstep(0.10, 0.30, sofaTexel.r - sofaTexel.b);
+                float fabricDetail = clamp(dot(sofaTexel.rgb, vec3(0.299, 0.587, 0.114)) * 2.8, 0.72, 1.08);
+                vec3 fabricColor = vec3(0.435, 0.353, 0.471) * fabricDetail;
+                vec3 woodColor = vec3(0.733, 0.584, 0.431);
+                diffuseColor.rgb *= mix(fabricColor, woodColor, woodMask);
+                diffuseColor.a *= sofaTexel.a;
+              #endif`
+            );
+          };
+          material.customProgramCacheKey = () => 'deep-mauve-sofa-light-oak-arms-v2';
+          material.roughness = .72;
+          material.metalness = 0;
+        } else if (materialName.includes('hotaru')) {
+          material.map = null;
+          material.color.set(0xcfc3d1);
+          material.roughness = .78;
+          material.metalness = 0;
+        } else if (materialName.includes('lambert')) {
+          material.map = null;
+          material.color.set(0xeee9e3);
+          material.roughness = .8;
+          material.metalness = 0;
+        }
+      }
+      if (item.style === 'tv' && !materialName.includes('screen')) {
+        material.map = null;
+        material.color.set(0x54434d);
+        material.roughness = .56;
+        material.metalness = .06;
+      } else if (item.style === 'tv' && materialName.includes('screen')) {
+        material.color.set(0xf1e8ef);
+        material.emissive.set(0x8c718e);
+        material.emissiveIntensity = .55;
+        material.roughness = .3;
+        material.metalness = 0;
+      }
       material.transparent = false;
       material.opacity = 1;
       material.alphaTest = 0;
@@ -208,5 +256,5 @@ renderer.domElement.addEventListener('pointerdown', () => { controls.autoRotate 
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
 
 const clock = new THREE.Clock();
-function animate() { requestAnimationFrame(animate); controls.update(); purpleLight.intensity = 22 + Math.sin(clock.getElapsedTime()*1.7)*2; renderer.render(scene, camera); }
+function animate() { requestAnimationFrame(animate); controls.update(); purpleLight.intensity = 4.25 + Math.sin(clock.getElapsedTime()*1.7) * .25; renderer.render(scene, camera); }
 animate();
