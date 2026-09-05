@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import './style.css';
 
 const scene = new THREE.Scene();
@@ -42,18 +44,95 @@ function box(size, position, material) {
 box([12, .28, 9], [0, -.14, 0], floorMat);
 box([12, 6.5, .25], [0, 3.1, -4.45], wallMat);
 box([.25, 6.5, 9], [-5.9, 3.1, 0], wallMat);
+
+function makeWindow() {
+  const windowGroup = new THREE.Group();
+  windowGroup.position.set(-1.9, 4.0, -4.29);
+  windowGroup.userData.label = 'NIGHT WINDOW';
+  const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x16111d, roughness: .42, metalness: .35 });
+  const glassMaterial = new THREE.MeshStandardMaterial({
+    color: 0x17305c,
+    emissive: 0x112b67,
+    emissiveIntensity: 1.25,
+    roughness: .18,
+    metalness: .25
+  });
+  const glass = new THREE.Mesh(new THREE.PlaneGeometry(2.35, 1.9), glassMaterial);
+  glass.position.z = .015;
+  windowGroup.add(glass);
+  for (const [size, position] of [
+    [[2.62,.13,.13],[0,1.02,.05]],
+    [[2.62,.13,.13],[0,-1.02,.05]],
+    [[.13,2.17,.13],[-1.25,0,.05]],
+    [[.13,2.17,.13],[1.25,0,.05]],
+    [[.08,1.92,.09],[0,0,.08]],
+    [[2.36,.08,.09],[0,0,.08]]
+  ]) {
+    const framePart = new THREE.Mesh(new THREE.BoxGeometry(...size), frameMaterial);
+    framePart.position.set(...position);
+    framePart.castShadow = true;
+    framePart.userData.root = windowGroup;
+    windowGroup.add(framePart);
+  }
+  glass.userData.root = windowGroup;
+  scene.add(windowGroup);
+  return windowGroup;
+}
+
+function makeDesk() {
+  const desk = new THREE.Group();
+  desk.position.set(-4.7, 0, -1.35);
+  desk.rotation.y = Math.PI / 2;
+  desk.scale.set(1.25, 1.05, 1.7);
+  desk.userData.label = 'EMPTY DESK';
+  const wood = new THREE.MeshStandardMaterial({ color: 0xb96b38, roughness: .62 });
+  const edge = new THREE.MeshStandardMaterial({ color: 0x3a213c, roughness: .5, metalness: .12 });
+  const accent = new THREE.MeshStandardMaterial({ color: 0xd3b62c, roughness: .42, metalness: .16 });
+
+  function deskPart(geometry, material, position) {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(...position);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.userData.root = desk;
+    desk.add(mesh);
+    return mesh;
+  }
+
+  deskPart(new RoundedBoxGeometry(3.7, .26, 1.45, 4, .11), wood, [0, 1.72, 0]);
+  deskPart(new RoundedBoxGeometry(3.78, .09, 1.5, 3, .04), accent, [0, 1.84, 0]);
+  deskPart(new RoundedBoxGeometry(.72, 1.55, 1.28, 4, .1), edge, [-1.35, .82, 0]);
+  deskPart(new RoundedBoxGeometry(.15, 1.57, .16, 3, .05), edge, [1.5, .81, -.48]);
+  deskPart(new RoundedBoxGeometry(.15, 1.57, .16, 3, .05), edge, [1.5, .81, .48]);
+
+  for (const y of [.45, .82, 1.19]) {
+    deskPart(new RoundedBoxGeometry(.57, .27, 1.31, 3, .06), new THREE.MeshStandardMaterial({ color: 0x4d2b50, roughness: .58 }), [-1.35, y, .02]);
+    deskPart(new THREE.BoxGeometry(.08, .045, .28), accent, [-.96, y, .02]);
+  }
+
+  scene.add(desk);
+  return desk;
+}
+
 scene.add(new THREE.HemisphereLight(0xb7c9ff, 0x32223e, 2.2));
 const key = new THREE.DirectionalLight(0xffffff, 3.1); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
 const purpleLight = new THREE.PointLight(PURPLE, 24, 10); purpleLight.position.set(-4, 3.5, 2); scene.add(purpleLight);
 const yellowLight = new THREE.PointLight(YELLOW, 22, 9); yellowLight.position.set(3, 3, -3); scene.add(yellowLight);
+const windowGlow = new THREE.PointLight(0x477dff, 7, 5); windowGlow.position.set(-1.55, 3.3, -3.8); scene.add(windowGlow);
 
 const interactables = [];
+interactables.push(makeWindow());
+interactables.push(makeDesk());
 const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
-const loader = new FBXLoader();
+const fbxLoader = new FBXLoader();
+const gltfLoader = new GLTFLoader();
 const assets = [
   { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true },
-  { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI }
+  { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI },
+  { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
+  { url: '/models/sea-cucumber-phone/Fig_NamacoPhone.fbx', name: 'SEA-CUCUMBER PHONE', pos: [-5.05,1.95,0], scale: .68, rot: Math.PI * 2.7 },
+  { url: '/models/haikara-magazine.glb', name: 'HAIKARAWALKER MAGAZINE', pos: [-4.5,1.8,-2.9], scale: 1.1, rot: .9, rotX: Math.PI * 1.556 , format: 'glb' }
 ];
 
 function fitAndPlace(object, item) {
@@ -62,7 +141,13 @@ function fitAndPlace(object, item) {
   const factor = item.scale / Math.max(size.x, size.y, size.z);
   // Preserve unit conversion already applied by format loaders (DAE commonly uses 0.01).
   object.scale.multiplyScalar(factor);
-  object.rotation.y = item.rot;
+  if (item.rotX) {
+    const yaw = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), item.rot);
+    const tilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), item.rotX);
+    object.quaternion.copy(yaw).multiply(tilt);
+  } else {
+    object.rotation.y = item.rot;
+  }
   object.updateMatrixWorld(true);
   bounds = new THREE.Box3().setFromObject(object);
   const center = bounds.getCenter(new THREE.Vector3());
@@ -100,10 +185,13 @@ function finishAssetLoad() {
   loadBar.style.width = `${loaded / assets.length * 100}%`;
   if (loaded === assets.length) setTimeout(() => document.querySelector('.loader').classList.add('done'), 350);
 }
-assets.forEach(item => loader.load(item.url, object => {
-  fitAndPlace(object, item);
+assets.forEach(item => {
+  const loader = item.format === 'glb' ? gltfLoader : fbxLoader;
+  loader.load(item.url, loadedAsset => {
+  fitAndPlace(loadedAsset.scene || loadedAsset, item);
   finishAssetLoad();
-}, undefined, error => { console.error(`Could not load ${item.name}`, error); finishAssetLoad(); }));
+  }, undefined, error => { console.error(`Could not load ${item.name}`, error); finishAssetLoad(); });
+});
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
