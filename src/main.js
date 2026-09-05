@@ -136,7 +136,8 @@ const assets = [
   { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
   { url: '/models/sea-cucumber-phone/Fig_NamacoPhone.fbx', name: 'SEA-CUCUMBER PHONE', pos: [-5.05,1.95,0], scale: .68, rot: Math.PI * 2.7, style: 'phone' },
   { url: '/models/haikara-magazine.glb', name: 'HAIKARAWALKER MAGAZINE', pos: [-4.5,1.8,-2.9], scale: 1.1, rot: .9, rotX: Math.PI * 1.556 , format: 'glb' },
-  { url: '/models/tall-coffee-to-go.glb', name: 'TALL COFFEE TO GO', pos: [-5.3,1.95,-2.5], scale: .62, rot: .4, format: 'glb' }
+  { url: '/models/tall-coffee-to-go.glb', name: 'TALL COFFEE TO GO', pos: [-5.3,1.95,-2.5], scale: .62, rot: .4, format: 'glb' },
+  { url: '/models/office-chair/scene.gltf', name: 'OFFICE CHAIR', pos: [-3.25,.03,-1.35], scale: 2.45, rot: Math.PI * 1.5, format: 'gltf' }
 ];
 
 function fitAndPlace(object, item) {
@@ -242,7 +243,7 @@ function finishAssetLoad() {
   if (loaded === assets.length) setTimeout(() => document.querySelector('.loader').classList.add('done'), 350);
 }
 assets.forEach(item => {
-  const loader = item.format === 'glb' ? gltfLoader : fbxLoader;
+  const loader = item.format === 'glb' || item.format === 'gltf' ? gltfLoader : fbxLoader;
   loader.load(item.url, loadedAsset => {
   fitAndPlace(loadedAsset.scene || loadedAsset, item);
   finishAssetLoad();
