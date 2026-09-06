@@ -257,7 +257,7 @@ const eliterAoMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Bo
 eliterAoMap.channel = 0;
 const assets = [
   { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true, style: 'sofa' },
-  { url: '/models/eliter-4k-scope/Wmn_Charger_LongScope.fbx', name: 'E-LITER 4K SCOPE', pos: [2.75,3.64,-4.08], scale: 3, rot: Math.PI / 2, style: 'eliter' },
+  { url: '/models/eliter-4k-scope/Wmn_Charger_LongScope.fbx', name: 'E-LITER 4K SCOPE', pos: [2.75,3.64,-4.08], scale: 3, rot: Math.PI / 2, style: 'eliter', tankStretch: 1.16 },
   { url: '/models/squid-cushion/Fig_SquidCushion00.fbx', name: 'YELLOW SQUID CUSHION', pos: [2.7,.82,-2.5], scale: .92, rot: -.28, rotX: -Math.PI / 2, style: 'yellowDecor' },
   { url: '/models/zapfish/Obj_Namazu.fbx', name: 'YELLOW ZAPFISH', pos: [-5.43,4.41,1.8], scale: 1, rot: Math.PI / 2, originalColor: true },
   { url: '/models/clam/Obj_Clam_A.fbx', name: 'CLAM', pos: [-5.43,4.41,1.3], scale: .52, rot: Math.PI / 2, originalColor: true },
@@ -322,6 +322,25 @@ function keepGeometrySide(object, side) {
 
 function fitAndPlace(object, item) {
   if (item.geometrySide) keepGeometrySide(object, item.geometrySide);
+  if (item.style === 'eliter' && item.tankStretch) {
+    object.traverse(child => {
+      if (!child.isMesh || !child.geometry.attributes.position) return;
+      child.geometry = child.geometry.clone();
+      const position = child.geometry.attributes.position;
+      const tankStart = .08;
+      for (let index = 0; index < position.count; index++) {
+        const alongWeapon = position.getY(index);
+        const height = position.getZ(index);
+        if (alongWeapon > tankStart && height > -.12) {
+          position.setY(index, tankStart + (alongWeapon - tankStart) * item.tankStretch);
+        }
+      }
+      position.needsUpdate = true;
+      child.geometry.computeVertexNormals();
+      child.geometry.computeBoundingBox();
+      child.geometry.computeBoundingSphere();
+    });
+  }
   if (item.style === 'agentDrawing') {
     object.traverse(child => {
       if (!child.isMesh) return;
