@@ -23,6 +23,7 @@ npm run dev
 - Squidshredder & Octoslapper QX-2 — Splatoon 2 asset 317407
 - Power Egg Pack — Splatoon 3 asset 337061
 - Cereal — Splatoon 3 asset 337417
+- Inkopolis Square — Splatoon 2 asset 315378
 
 These Nintendo assets are included for a non-commercial fan prototype. They should not be treated as original or commercially licensed project assets.
 

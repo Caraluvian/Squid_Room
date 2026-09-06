@@ -43,8 +43,21 @@ function box(size, position, material) {
   mesh.position.set(...position); mesh.receiveShadow = true; mesh.castShadow = true; room.add(mesh); return mesh;
 }
 box([12, .28, 9], [0, -.14, 0], floorMat);
-box([12, 6.5, .25], [0, 3.1, -4.45], wallMat);
+// Build the back wall around the window so transparent glass reveals outdoors.
+box([2.78, 6.5, .25], [-4.61, 3.1, -4.45], wallMat);
+box([6.58, 6.5, .25], [2.71, 3.1, -4.45], wallMat);
+box([2.64, 3.065, .25], [-1.9, 1.3825, -4.45], wallMat);
+box([2.64, 1.265, .25], [-1.9, 5.7175, -4.45], wallMat);
 box([.25, 6.5, 9], [-5.9, 3.1, 0], wallMat);
+
+const inkopolisTexture = new THREE.TextureLoader().load('/textures/inkopolis-square.png');
+inkopolisTexture.colorSpace = THREE.SRGBColorSpace;
+const inkopolisBackdrop = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.5, 2.17),
+  new THREE.MeshBasicMaterial({ map: inkopolisTexture, transparent: true, alphaTest: .02, fog: false })
+);
+inkopolisBackdrop.position.set(-2, 3.9, -4.7);
+scene.add(inkopolisBackdrop);
 
 function makeWindow() {
   const windowGroup = new THREE.Group();
@@ -52,11 +65,12 @@ function makeWindow() {
   windowGroup.userData.label = 'NIGHT WINDOW';
   const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x67596b, roughness: .5, metalness: .16 });
   const glassMaterial = new THREE.MeshStandardMaterial({
-    color: 0x8e8491,
-    emissive: 0x665a6d,
-    emissiveIntensity: .07,
-    roughness: .18,
-    metalness: .25
+    color: 0xcce9f4,
+    roughness: .06,
+    metalness: 0,
+    transparent: true,
+    opacity: .16,
+    depthWrite: false
   });
   const glass = new THREE.Mesh(new THREE.PlaneGeometry(2.35, 1.9), glassMaterial);
   glass.position.z = .015;
