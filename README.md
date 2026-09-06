@@ -19,6 +19,8 @@ npm run dev
 - Golden Egg — Splatoon 2 asset 313161
 - Gray Sardinium — Splatoon 2 asset 317982
 - Clam — Splatoon 2 asset 313322
+- Super Sea Snails — Splatoon 2 asset 317412
+- Squidshredder & Octoslapper QX-2 — Splatoon 2 asset 317407
 
 These Nintendo assets are included for a non-commercial fan prototype. They should not be treated as original or commercially licensed project assets.
 

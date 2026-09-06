@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import './style.css';
 
@@ -160,6 +161,7 @@ const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
 const fbxLoader = new FBXLoader();
 const gltfLoader = new GLTFLoader();
+const colladaLoader = new ColladaLoader();
 const phoneEmissiveMap = new THREE.TextureLoader().load('/models/sea-cucumber-phone/m_body_emm.png');
 phoneEmissiveMap.colorSpace = THREE.SRGBColorSpace;
 const goldenEggEmissiveMap = new THREE.TextureLoader().load('/models/golden-egg-s2/M_CoopIkuraDrop_Core_Emm.png');
@@ -171,7 +173,9 @@ const assets = [
   { url: '/models/clam/Obj_Clam_A.fbx', name: 'CLAM', pos: [-5.43,4.41,.88], scale: .52, rot: Math.PI / 2, originalColor: true },
   { url: '/models/sardinium-gray/Obj_WeaponParts.fbx', name: 'GRAY SARDINIUM', pos: [-5.43,4.41,3.12], scale: .52, rot: Math.PI / 2, originalColor: true },
   { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/super-sea-snails/Obj_PlazaTurbanshells.dae', name: 'SUPER SEA SNAILS', pos: [-5.43,3.51,2], scale: .62, rot: Math.PI / 2, format: 'dae', originalColor: true },
   { url: '/models/golden-egg-s2/Obj_CoopIkuraDrop.fbx', name: 'GOLDEN EGG', pos: [-5.43,3.51,2.78], scale: .62, rot: Math.PI / 2, style: 'goldenEgg', originalColor: true },
+  { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'SQUIDSHREDDER & OCTOSLAPPER QX-2', pos: [-5.12,.03,2], scale: 2.15, rot: Math.PI / 2, originalColor: true },
   { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI, style: 'tv' },
   { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
   { url: '/models/sea-cucumber-phone/Fig_NamacoPhone.fbx', name: 'SEA-CUCUMBER PHONE', pos: [-5.05,1.95,0], scale: .68, rot: Math.PI * 2.7, style: 'phone' },
@@ -308,7 +312,9 @@ function finishAssetLoad() {
   if (loaded === assets.length) setTimeout(() => document.querySelector('.loader').classList.add('done'), 350);
 }
 assets.forEach(item => {
-  const loader = item.format === 'glb' || item.format === 'gltf' ? gltfLoader : fbxLoader;
+  const loader = item.format === 'glb' || item.format === 'gltf'
+    ? gltfLoader
+    : item.format === 'dae' ? colladaLoader : fbxLoader;
   loader.load(item.url, loadedAsset => {
   fitAndPlace(loadedAsset.scene || loadedAsset, item);
   finishAssetLoad();
