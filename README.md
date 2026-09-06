@@ -29,6 +29,9 @@ npm run dev
 - Agent 3 Drawing — Splatoon 2 asset 316023
 - Newspaper — Splatoon 3 asset 337058
 - Lobby Ticket — Splatoon 3 asset 337057
+- Dynamo Roller — Splatoon 3 asset 342248
+- Super Sea Snails Case — Splatoon 3 asset 337084
+- E-liter 4K Scope — Splatoon 3 asset 342254
 
 These Nintendo assets are included for a non-commercial fan prototype. They should not be treated as original or commercially licensed project assets.
 

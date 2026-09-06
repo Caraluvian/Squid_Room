@@ -4,6 +4,7 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import './style.css';
 
 const scene = new THREE.Scene();
@@ -23,6 +24,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.querySelector('#app').appendChild(renderer.domElement);
 
+const environmentGenerator = new THREE.PMREMGenerator(renderer);
+const metalEnvironment = environmentGenerator.fromScene(new RoomEnvironment(), .04).texture;
+environmentGenerator.dispose();
+
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(3.0, 2.2, -0.8);
 controls.enableDamping = true;
@@ -34,7 +39,6 @@ controls.autoRotateSpeed = 0.42;
 
 const room = new THREE.Group();
 scene.add(room);
-const YELLOW = 0xeee7dc;
 const PURPLE = 0x9b899d;
 const wallMat = new THREE.MeshStandardMaterial({ color: 0xc0b4c1, roughness: .92 });
 const floorMat = new THREE.MeshStandardMaterial({ color: 0xe1dbd2, roughness: .82 });
@@ -160,6 +164,32 @@ function makeDeskShelf() {
   return shelf;
 }
 
+function makeSofaShelf() {
+  const shelf = new THREE.Group();
+  shelf.position.set(2.75, 3.55, -4.14);
+  shelf.userData.label = 'SOFA DISPLAY SHELF';
+  const wood = new THREE.MeshStandardMaterial({
+    color: 0xc89a70,
+    roughness: .68,
+    metalness: .01
+  });
+
+  function shelfPart(size, position) {
+    const mesh = new THREE.Mesh(new RoundedBoxGeometry(...size, 4, .045), wood);
+    mesh.position.set(...position);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.userData.root = shelf;
+    shelf.add(mesh);
+  }
+
+  shelfPart([3.25, .14, .65], [0, 0, 0]);
+  shelfPart([.14, .42, .14], [-1.08, -.22, -.22]);
+  shelfPart([.14, .42, .14], [1.08, -.22, -.22]);
+  scene.add(shelf);
+  return shelf;
+}
+
 function makeCorkBoardArt() {
   const artwork = new THREE.Group();
   artwork.position.set(-5.54, 3.82, -2.65);
@@ -194,13 +224,13 @@ scene.add(new THREE.HemisphereLight(0xfffaf4, 0x918891, 1.68));
 const key = new THREE.DirectionalLight(0xfff5e8, 2.05); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
 const purpleLight = new THREE.PointLight(PURPLE, 4.5, 10); purpleLight.position.set(-4, 3.5, -1.5); scene.add(purpleLight);
 const shelfLight = new THREE.PointLight(0xffffff, 2.25, 4.5, 2); shelfLight.position.set(-4.35, 4.65, 2); scene.add(shelfLight);
-const yellowLight = new THREE.PointLight(YELLOW, 5, 9); yellowLight.position.set(3, 3, -3); scene.add(yellowLight);
 const windowGlow = new THREE.PointLight(0xb4a8b9, 1.8, 5); windowGlow.position.set(-1.55, 3.3, -3.8); scene.add(windowGlow);
 
 const interactables = [];
 interactables.push(makeWindow());
 interactables.push(makeDesk());
 interactables.push(makeDeskShelf());
+interactables.push(makeSofaShelf());
 interactables.push(makeCorkBoardArt());
 const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
@@ -216,8 +246,18 @@ const yellowTicketColorMap = new THREE.TextureLoader().load('/models/lobby-ticke
 yellowTicketColorMap.colorSpace = THREE.SRGBColorSpace;
 const yellowTicketNormalMap = new THREE.TextureLoader().load('/models/lobby-ticket/M_Ticket_Nrm.0.png');
 const yellowTicketRoughnessMap = new THREE.TextureLoader().load('/models/lobby-ticket/M_ticket_Rgh.0.png');
+const seaSnailEmissiveMap = new THREE.TextureLoader().load('/models/super-sea-snails-s3/Turbanshell00_Emm.png');
+seaSnailEmissiveMap.colorSpace = THREE.SRGBColorSpace;
+const eliterColorMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Body_Alb.png');
+eliterColorMap.colorSpace = THREE.SRGBColorSpace;
+const eliterNormalMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Body_Nrm.png');
+const eliterRoughnessMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Body_Rgh.png');
+const eliterMetalnessMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Body_Mtl.png');
+const eliterAoMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Body_Ao.png');
+eliterAoMap.channel = 0;
 const assets = [
   { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true, style: 'sofa' },
+  { url: '/models/eliter-4k-scope/Wmn_Charger_LongScope.fbx', name: 'E-LITER 4K SCOPE', pos: [2.75,3.64,-4.08], scale: 3, rot: Math.PI / 2, style: 'eliter' },
   { url: '/models/squid-cushion/Fig_SquidCushion00.fbx', name: 'YELLOW SQUID CUSHION', pos: [2.7,.82,-2.5], scale: .92, rot: -.28, rotX: -Math.PI / 2, style: 'yellowDecor' },
   { url: '/models/zapfish/Obj_Namazu.fbx', name: 'YELLOW ZAPFISH', pos: [-5.43,4.41,1.8], scale: 1, rot: Math.PI / 2, originalColor: true },
   { url: '/models/clam/Obj_Clam_A.fbx', name: 'CLAM', pos: [-5.43,4.41,1.3], scale: .52, rot: Math.PI / 2, originalColor: true },
@@ -231,6 +271,8 @@ const assets = [
   { url: '/models/golden-egg-s2/Obj_CoopIkuraDrop.fbx', name: 'GOLDEN EGG', pos: [-5.43,3.51,2.78], scale: .62, rot: Math.PI / 2, style: 'goldenEgg', originalColor: true },
   { url: '/models/power-egg-pack/Obj_Sphere10.fbx', name: 'POWER EGG PACK', pos: [-5.43,3.51,2], scale: .6, rot: Math.PI / 2, originalColor: true },
   { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'OCTOSLAPPER QX-2 BASS', pos: [-5.15,.03,1.15], scale: 2.6, rot: Math.PI /2, geometrySide: -1, originalColor: true },
+  // { url: '/models/dynamo-roller/Wmn_Roller_Heavy.fbx', name: 'DYNAMO ROLLER', pos: [-5.12,.03,3], scale: 2.4, rot: Math.PI * .5, localRotX: -.16, localRotZ: Math.PI, originalColor: true },
+  { url: '/models/super-sea-snails-s3/Obj_PlazaTurbanshellCase.fbx', name: 'SUPER SEA SNAILS CASE', pos: [-5.12,.03,3], scale: 2.2, rot: Math.PI / 2, style: 'seaSnailsS3', originalColor: true },
   { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'SQUIDSHREDDER GUITAR', pos: [4.55,.03,-3.25], scale: 2.6, rot: Math.PI * 2, geometrySide: 1, originalColor: true },
   { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI, style: 'tv' },
   { url: '/models/little-salmon/scene.gltf', name: 'SMALLFRY', pos: [2.4,1.9,1.9], scale: .78, rot: Math.PI * .85, format: 'gltf' },
@@ -308,6 +350,13 @@ function fitAndPlace(object, item) {
   } else {
     object.rotation.y = item.rot;
   }
+  if (item.localRotX) {
+    const localTilt = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(1, 0, 0),
+      item.localRotX
+    );
+    object.quaternion.multiply(localTilt);
+  }
   if (item.localRotZ) {
     const localRoll = new THREE.Quaternion().setFromAxisAngle(
       new THREE.Vector3(0, 0, 1),
@@ -331,6 +380,27 @@ function fitAndPlace(object, item) {
     child.castShadow = true;
     child.receiveShadow = true;
     child.userData.root = object;
+    if (item.style === 'eliter') {
+      const sourceMaterials = Array.isArray(child.material) ? child.material : [child.material];
+      const pbrMaterials = sourceMaterials.map(source => new THREE.MeshPhysicalMaterial({
+        name: source?.name || 'E-liter PBR',
+        map: eliterColorMap,
+        normalMap: eliterNormalMap,
+        roughnessMap: eliterRoughnessMap,
+        roughness: .68,
+        metalnessMap: eliterMetalnessMap,
+        metalness: .86,
+        aoMap: eliterAoMap,
+        aoMapIntensity: .8,
+        envMap: metalEnvironment,
+        envMapIntensity: .65,
+        clearcoat: .24,
+        clearcoatRoughness: .34,
+        vertexColors: source?.vertexColors ?? true,
+        side: source?.side ?? THREE.FrontSide
+      }));
+      child.material = Array.isArray(child.material) ? pbrMaterials : pbrMaterials[0];
+    }
     const materials = Array.isArray(child.material) ? child.material : [child.material];
     for (const material of materials) {
       if (!material) continue;
@@ -400,6 +470,11 @@ function fitAndPlace(object, item) {
         material.normalMap = yellowTicketNormalMap;
         material.roughnessMap = yellowTicketRoughnessMap;
         material.color.set(0xffffff);
+      }
+      if (item.style === 'seaSnailsS3' && materialName.includes('turbanshell')) {
+        material.emissiveMap = seaSnailEmissiveMap;
+        material.emissive.set(0xffffff);
+        material.emissiveIntensity = .2;
       }
       if (item.style === 'newspaper') {
         material.alphaMap = newspaperAlphaMap;
