@@ -21,9 +21,14 @@ npm run dev
 - Clam — Splatoon 2 asset 313322
 - Super Sea Snails — Splatoon 2 asset 317412
 - Squidshredder & Octoslapper QX-2 — Splatoon 2 asset 317407
-- Power Egg Pack — Splatoon 3 asset 337061
+- Mr. Grizz (Kibori Kuma) — Splatoon 3 asset 337100
 - Cereal — Splatoon 3 asset 337417
 - Inkopolis Square — Splatoon 2 asset 315378
+- Squid Cellie Charm — Splatoon 3 asset 337423
+- Octo Cellie Charm — Splatoon 3 asset 337420
+- Agent 3 Drawing — Splatoon 2 asset 316023
+- Newspaper — Splatoon 3 asset 337058
+- Lobby Ticket — Splatoon 3 asset 337057
 
 These Nintendo assets are included for a non-commercial fan prototype. They should not be treated as original or commercially licensed project assets.
 
@@ -32,3 +37,4 @@ These Nintendo assets are included for a non-commercial fan prototype. They shou
 - [Office Chair](https://sketchfab.com/3d-models/office-chair-b228a29fa84544c2be501c295653ffe7) by [Red Fox / nokillnando](https://sketchfab.com/nokillnando), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/). Textures were resized for web delivery.
 - [Desk lamp](https://sketchfab.com/3d-models/desk-lamp-7377ec591df04445a1aae370017aaa13) by [KaramellGlass](https://sketchfab.com/KaramellGlass), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
 - [Smallfry](https://sketchfab.com/3d-models/smallfry-105ff70a7a8347bbbc22ec31249aebf3) by [Pikachar1274567](https://sketchfab.com/pikacharbutag), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+- [Cork Board Base](https://sketchfab.com/3d-models/cork-board-base-3da797d16dc34f2d8b9c7e862ef37515) by [nukepilled](https://sketchfab.com/nukepilled), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).

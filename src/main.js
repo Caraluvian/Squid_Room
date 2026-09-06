@@ -160,6 +160,36 @@ function makeDeskShelf() {
   return shelf;
 }
 
+function makeCorkBoardArt() {
+  const artwork = new THREE.Group();
+  artwork.position.set(-5.54, 3.82, -2.65);
+  artwork.rotation.y = Math.PI / 2;
+
+  artwork.userData.label = 'CORK BOARD ART';
+
+  const border = new THREE.Mesh(
+    new THREE.PlaneGeometry(.78, .78),
+    new THREE.MeshStandardMaterial({ color: 0xf4eee8, roughness: .82 })
+  );
+  artwork.add(border);
+
+  const texture = new THREE.TextureLoader().load('/textures/cork-board-art.jpeg');
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const print = new THREE.Mesh(
+    new THREE.PlaneGeometry(.7, .71),
+    new THREE.MeshBasicMaterial({ map: texture })
+  );
+  print.position.z = .006;
+  artwork.add(print);
+
+  artwork.traverse(child => {
+    if (!child.isMesh) return;
+    child.userData.root = artwork;
+  });
+  scene.add(artwork);
+  return artwork;
+}
+
 scene.add(new THREE.HemisphereLight(0xfffaf4, 0x918891, 1.68));
 const key = new THREE.DirectionalLight(0xfff5e8, 2.05); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
 const purpleLight = new THREE.PointLight(PURPLE, 4.5, 10); purpleLight.position.set(-4, 3.5, -1.5); scene.add(purpleLight);
@@ -171,6 +201,7 @@ const interactables = [];
 interactables.push(makeWindow());
 interactables.push(makeDesk());
 interactables.push(makeDeskShelf());
+interactables.push(makeCorkBoardArt());
 const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
 const fbxLoader = new FBXLoader();
@@ -180,6 +211,11 @@ const phoneEmissiveMap = new THREE.TextureLoader().load('/models/sea-cucumber-ph
 phoneEmissiveMap.colorSpace = THREE.SRGBColorSpace;
 const goldenEggEmissiveMap = new THREE.TextureLoader().load('/models/golden-egg-s2/M_CoopIkuraDrop_Core_Emm.png');
 goldenEggEmissiveMap.colorSpace = THREE.SRGBColorSpace;
+const newspaperAlphaMap = new THREE.TextureLoader().load('/models/newspaper/M_body_Opa.png');
+const yellowTicketColorMap = new THREE.TextureLoader().load('/models/lobby-ticket/M_ticket_Alb.0.png');
+yellowTicketColorMap.colorSpace = THREE.SRGBColorSpace;
+const yellowTicketNormalMap = new THREE.TextureLoader().load('/models/lobby-ticket/M_Ticket_Nrm.0.png');
+const yellowTicketRoughnessMap = new THREE.TextureLoader().load('/models/lobby-ticket/M_ticket_Rgh.0.png');
 const assets = [
   { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true, style: 'sofa' },
   { url: '/models/squid-cushion/Fig_SquidCushion00.fbx', name: 'YELLOW SQUID CUSHION', pos: [2.7,.82,-2.5], scale: .92, rot: -.28, rotX: -Math.PI / 2, style: 'yellowDecor' },
@@ -189,7 +225,8 @@ const assets = [
   { url: '/models/cereal-01/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 2', pos: [-5.43,4.41,2.88], scale: .36, rot: Math.PI / 2, originalColor: true },
   { url: '/models/cereal-02/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 3', pos: [-5.43,4.41,3.16], scale: .36, rot: Math.PI / 2, originalColor: true },
   { url: '/models/sardinium-gray/Obj_WeaponParts.fbx', name: 'GRAY SARDINIUM', pos: [-5.43,4.41,2.2], scale: .52, rot: Math.PI / 2, originalColor: true },
-  { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/mr-grizz/Obj_KumasanRadio.fbx', name: 'MR. GRIZZ', pos: [-5.43,3.51,1.18], scale: .9, rot: Math.PI / 2, originalColor: true },
+  // { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, originalColor: true },
   { url: '/models/super-sea-snails/Obj_PlazaTurbanshells.dae', name: 'SUPER SEA SNAILS', pos: [-5.43,3.51,2], scale: .62, rot: Math.PI / 2, format: 'dae', originalColor: true },
   { url: '/models/golden-egg-s2/Obj_CoopIkuraDrop.fbx', name: 'GOLDEN EGG', pos: [-5.43,3.51,2.78], scale: .62, rot: Math.PI / 2, style: 'goldenEgg', originalColor: true },
   { url: '/models/power-egg-pack/Obj_Sphere10.fbx', name: 'POWER EGG PACK', pos: [-5.43,3.51,2], scale: .6, rot: Math.PI / 2, originalColor: true },
@@ -202,7 +239,13 @@ const assets = [
   { url: '/models/haikara-magazine.glb', name: 'HAIKARAWALKER MAGAZINE', pos: [-4.3,1.8,-2.9], scale: 1.1, rot: .9, rotX: Math.PI * 1.556 , format: 'glb' },
   { url: '/models/tall-coffee-to-go.glb', name: 'TALL COFFEE TO GO', pos: [-5.3,1.95,-2.5], scale: .62, rot: .4, format: 'glb' },
   { url: '/models/desk-lamp/scene.gltf', name: 'DESK LAMP', pos: [-5.2,1.92,-3.45], scale: 1.35, rot: -.7, format: 'gltf' },
-  { url: '/models/office-chair/scene.gltf', name: 'OFFICE CHAIR', pos: [-3.25,.03,-1.5], scale: 2.45, rot: Math.PI * 1.5, format: 'gltf' }
+  { url: '/models/office-chair/scene.gltf', name: 'OFFICE CHAIR', pos: [-3.25,.03,-1.5], scale: 2.45, rot: Math.PI * 1.5, format: 'gltf' },
+  { url: '/models/cork-board/scene.gltf', name: 'CORK BOARD', pos: [-5.68,3.25,-2], scale: 2.8, rot: 0, format: 'gltf' },
+  { url: '/models/squid-charm/Fig_StrapInkFish.fbx', name: 'SQUID CELLIE CHARM', pos: [-5.55,4.3,-2.8], scale: .7, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/octo-charm/Fig_StrapOctopus.fbx', name: 'OCTO CELLIE CHARM', pos: [-5.55,4.3,-2.2], scale: .7, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/agent3-drawing/Obj_SketchAgent3_Octa.fbx', name: 'AGENT 3 DRAWING', pos: [-5.55,3.4,-1.35], scale: .95, rot: Math.PI / 2, style: 'agentDrawing', originalColor: true },
+  { url: '/models/lobby-ticket/Obj_TicketLob.fbx', name: 'YELLOW LOBBY TICKET', pos: [-5.4,4.25,-1.25], scale: .82, rot: Math.PI / 2, style: 'yellowTicket', originalColor: true },
+  // { url: '/models/newspaper/Obj_Newspaper.fbx', name: 'NEWSPAPER', pos: [-5.55,4,-1.25], scale: .9, rot: Math.PI * .5, rotX: Math.PI / 2, localRotY: -Math.PI / 2, style: 'newspaper', originalColor: true }
 ];
 
 function keepGeometrySide(object, side) {
@@ -237,6 +280,12 @@ function keepGeometrySide(object, side) {
 
 function fitAndPlace(object, item) {
   if (item.geometrySide) keepGeometrySide(object, item.geometrySide);
+  if (item.style === 'agentDrawing') {
+    object.traverse(child => {
+      if (!child.isMesh) return;
+      child.visible = child.name.startsWith('Paper__') || child.name.startsWith('Tape');
+    });
+  }
   let bounds = new THREE.Box3().setFromObject(object);
   const size = bounds.getSize(new THREE.Vector3());
   const factor = item.scale / Math.max(size.x, size.y, size.z);
@@ -249,8 +298,22 @@ function fitAndPlace(object, item) {
       item.standVertical ? -Math.PI / 2 : item.rotX
     );
     object.quaternion.copy(yaw).multiply(tilt);
+    if (item.localRotY) {
+      const localYaw = new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        item.localRotY
+      );
+      object.quaternion.multiply(localYaw);
+    }
   } else {
     object.rotation.y = item.rot;
+  }
+  if (item.localRotZ) {
+    const localRoll = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1),
+      item.localRotZ
+    );
+    object.quaternion.multiply(localRoll);
   }
   object.updateMatrixWorld(true);
   bounds = new THREE.Box3().setFromObject(object);
@@ -332,7 +395,20 @@ function fitAndPlace(object, item) {
         }
       }
       if (item.originalColor && material.map) material.color.set(0xffffff);
-      if (item.style === 'goldenEgg' && !materialName.includes('core')) {
+      if (item.style === 'yellowTicket') {
+        material.map = yellowTicketColorMap;
+        material.normalMap = yellowTicketNormalMap;
+        material.roughnessMap = yellowTicketRoughnessMap;
+        material.color.set(0xffffff);
+      }
+      if (item.style === 'newspaper') {
+        material.alphaMap = newspaperAlphaMap;
+        material.transparent = true;
+        material.opacity = 1;
+        material.alphaTest = .16;
+        material.side = THREE.DoubleSide;
+        material.depthWrite = true;
+      } else if (item.style === 'goldenEgg' && !materialName.includes('core')) {
         // Keep the round outer shell, but let the fish-shaped core show through.
         material.transparent = true;
         material.opacity = .52;
