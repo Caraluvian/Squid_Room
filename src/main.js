@@ -6,8 +6,8 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import './style.css';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xccc5cb);
-scene.fog = new THREE.Fog(0xccc5cb, 15, 32);
+scene.background = new THREE.Color(0xd8d3d8);
+scene.fog = new THREE.Fog(0xd8d3d8, 15, 32);
 
 const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 80);
 camera.position.set(3.0, 7.2, 14.2);
@@ -17,7 +17,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = .78;
+renderer.toneMappingExposure = .84;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.querySelector('#app').appendChild(renderer.domElement);
@@ -35,8 +35,8 @@ const room = new THREE.Group();
 scene.add(room);
 const YELLOW = 0xeee7dc;
 const PURPLE = 0x9b899d;
-const wallMat = new THREE.MeshStandardMaterial({ color: 0xb2a5b4, roughness: .92 });
-const floorMat = new THREE.MeshStandardMaterial({ color: 0xd6cfc4, roughness: .82 });
+const wallMat = new THREE.MeshStandardMaterial({ color: 0xc0b4c1, roughness: .92 });
+const floorMat = new THREE.MeshStandardMaterial({ color: 0xe1dbd2, roughness: .82 });
 function box(size, position, material) {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
   mesh.position.set(...position); mesh.receiveShadow = true; mesh.castShadow = true; room.add(mesh); return mesh;
@@ -114,24 +114,64 @@ function makeDesk() {
   return desk;
 }
 
-scene.add(new THREE.HemisphereLight(0xf5efe8, 0x887f87, 1.55));
-const key = new THREE.DirectionalLight(0xfff2df, 1.9); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
-const purpleLight = new THREE.PointLight(PURPLE, 4.5, 10); purpleLight.position.set(-4, 3.5, 2); scene.add(purpleLight);
+function makeDeskShelf() {
+  const shelf = new THREE.Group();
+  shelf.position.set(-5.55, 3.42, 2);
+  shelf.userData.label = 'TWO-TIER SHELF';
+  const shelfMaterial = new THREE.MeshStandardMaterial({
+    color: 0xc88d52,
+    roughness: .62,
+    metalness: .02
+  });
+
+  function shelfPart(size, position) {
+    const mesh = new THREE.Mesh(new RoundedBoxGeometry(...size, 4, .045), shelfMaterial);
+    mesh.position.set(...position);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.userData.root = shelf;
+    shelf.add(mesh);
+  }
+
+  // Two floating rows, with compact wall brackets below each ledge.
+  shelfPart([.62, .12, 2.65], [0, 0, 0]);
+  shelfPart([.62, .12, 2.65], [0, .9, 0]);
+  for (const y of [-.24, .66]) {
+    shelfPart([.12, .48, .12], [-.24, y, -.95]);
+    shelfPart([.12, .48, .12], [-.24, y, .95]);
+  }
+
+  scene.add(shelf);
+  return shelf;
+}
+
+scene.add(new THREE.HemisphereLight(0xfffaf4, 0x918891, 1.68));
+const key = new THREE.DirectionalLight(0xfff5e8, 2.05); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
+const purpleLight = new THREE.PointLight(PURPLE, 4.5, 10); purpleLight.position.set(-4, 3.5, -1.5); scene.add(purpleLight);
+const shelfLight = new THREE.PointLight(0xffffff, 2.25, 4.5, 2); shelfLight.position.set(-4.35, 4.65, 2); scene.add(shelfLight);
 const yellowLight = new THREE.PointLight(YELLOW, 5, 9); yellowLight.position.set(3, 3, -3); scene.add(yellowLight);
 const windowGlow = new THREE.PointLight(0xb4a8b9, 1.8, 5); windowGlow.position.set(-1.55, 3.3, -3.8); scene.add(windowGlow);
 
 const interactables = [];
 interactables.push(makeWindow());
 interactables.push(makeDesk());
+interactables.push(makeDeskShelf());
 const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
 const fbxLoader = new FBXLoader();
 const gltfLoader = new GLTFLoader();
 const phoneEmissiveMap = new THREE.TextureLoader().load('/models/sea-cucumber-phone/m_body_emm.png');
 phoneEmissiveMap.colorSpace = THREE.SRGBColorSpace;
+const goldenEggEmissiveMap = new THREE.TextureLoader().load('/models/golden-egg-s2/M_CoopIkuraDrop_Core_Emm.png');
+goldenEggEmissiveMap.colorSpace = THREE.SRGBColorSpace;
 const assets = [
   { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true, style: 'sofa' },
-  { url: '/models/squid-cushion/Fig_SquidCushion00.fbx', name: 'YELLOW SQUID CUSHION', pos: [2.7,.82,-2.5], scale: .92, rot: -.28, rotX: -Math.PI / 2 },
+  { url: '/models/squid-cushion/Fig_SquidCushion00.fbx', name: 'YELLOW SQUID CUSHION', pos: [2.7,.82,-2.5], scale: .92, rot: -.28, rotX: -Math.PI / 2, style: 'yellowDecor' },
+  { url: '/models/zapfish/Obj_Namazu.fbx', name: 'YELLOW ZAPFISH', pos: [-5.43,4.41,2], scale: 1, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/clam/Obj_Clam_A.fbx', name: 'CLAM', pos: [-5.43,4.41,.88], scale: .52, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/sardinium-gray/Obj_WeaponParts.fbx', name: 'GRAY SARDINIUM', pos: [-5.43,4.41,3.12], scale: .52, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/golden-egg-s2/Obj_CoopIkuraDrop.fbx', name: 'GOLDEN EGG', pos: [-5.43,3.51,2.78], scale: .62, rot: Math.PI / 2, style: 'goldenEgg', originalColor: true },
   { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI, style: 'tv' },
   { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
   { url: '/models/sea-cucumber-phone/Fig_NamacoPhone.fbx', name: 'SEA-CUCUMBER PHONE', pos: [-5.05,1.95,0], scale: .68, rot: Math.PI * 2.7, style: 'phone' },
@@ -225,12 +265,36 @@ function fitAndPlace(object, item) {
         material.emissive.set(0xf5f4f2);
         material.emissiveIntensity = .85;
       }
-      material.transparent = false;
-      material.opacity = 1;
-      material.alphaTest = 0;
+      if (item.style === 'yellowDecor' && material.map) {
+        material.color.setRGB(1.12, 1.08, .96);
+        if (material.emissive) {
+          material.emissiveMap = material.map;
+          material.emissive.set(0xc4ac7c);
+          material.emissiveIntensity = .32;
+        }
+      }
+      if (item.originalColor && material.map) material.color.set(0xffffff);
+      if (item.style === 'goldenEgg' && !materialName.includes('core')) {
+        // Keep the round outer shell, but let the fish-shaped core show through.
+        material.transparent = true;
+        material.opacity = .52;
+        material.alphaTest = 0;
+        material.side = THREE.DoubleSide;
+        material.depthWrite = false;
+        material.roughness = .22;
+      } else {
+        material.transparent = false;
+        material.opacity = 1;
+        material.alphaTest = 0;
+        material.side = THREE.FrontSide;
+        material.depthWrite = true;
+        if (item.style === 'goldenEgg' && materialName.includes('core')) {
+          material.emissiveMap = goldenEggEmissiveMap;
+          material.emissive.set(0xffffff);
+          material.emissiveIntensity = .22;
+        }
+      }
       material.depthTest = true;
-      material.depthWrite = true;
-      material.side = THREE.FrontSide;
       material.needsUpdate = true;
     }
   });

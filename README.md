@@ -14,6 +14,11 @@ npm run dev
 - Couch — Splatoon 2 asset 315270
 - Staff Credits TV — Splatoon 2 asset 315262
 - Lobby Music Selector — Splatoon 3 asset 337069
+- Yellow Zapfish — Splatoon 2 asset 313171
+- Marie's Boom Box — Splatoon 2 asset 313164
+- Golden Egg — Splatoon 2 asset 313161
+- Gray Sardinium — Splatoon 2 asset 317982
+- Clam — Splatoon 2 asset 313322
 
 These Nintendo assets are included for a non-commercial fan prototype. They should not be treated as original or commercially licensed project assets.
 
