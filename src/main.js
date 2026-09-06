@@ -169,13 +169,18 @@ goldenEggEmissiveMap.colorSpace = THREE.SRGBColorSpace;
 const assets = [
   { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true, style: 'sofa' },
   { url: '/models/squid-cushion/Fig_SquidCushion00.fbx', name: 'YELLOW SQUID CUSHION', pos: [2.7,.82,-2.5], scale: .92, rot: -.28, rotX: -Math.PI / 2, style: 'yellowDecor' },
-  { url: '/models/zapfish/Obj_Namazu.fbx', name: 'YELLOW ZAPFISH', pos: [-5.43,4.41,2], scale: 1, rot: Math.PI / 2, originalColor: true },
-  { url: '/models/clam/Obj_Clam_A.fbx', name: 'CLAM', pos: [-5.43,4.41,.88], scale: .52, rot: Math.PI / 2, originalColor: true },
-  { url: '/models/sardinium-gray/Obj_WeaponParts.fbx', name: 'GRAY SARDINIUM', pos: [-5.43,4.41,3.12], scale: .52, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/zapfish/Obj_Namazu.fbx', name: 'YELLOW ZAPFISH', pos: [-5.43,4.41,1.8], scale: 1, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/clam/Obj_Clam_A.fbx', name: 'CLAM', pos: [-5.43,4.41,1.3], scale: .52, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/cereal/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 1', pos: [-5.43,4.41,2.6], scale: .36, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/cereal-01/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 2', pos: [-5.43,4.41,2.88], scale: .36, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/cereal-02/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 3', pos: [-5.43,4.41,3.16], scale: .36, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/sardinium-gray/Obj_WeaponParts.fbx', name: 'GRAY SARDINIUM', pos: [-5.43,4.41,2.2], scale: .52, rot: Math.PI / 2, originalColor: true },
   { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, originalColor: true },
   { url: '/models/super-sea-snails/Obj_PlazaTurbanshells.dae', name: 'SUPER SEA SNAILS', pos: [-5.43,3.51,2], scale: .62, rot: Math.PI / 2, format: 'dae', originalColor: true },
   { url: '/models/golden-egg-s2/Obj_CoopIkuraDrop.fbx', name: 'GOLDEN EGG', pos: [-5.43,3.51,2.78], scale: .62, rot: Math.PI / 2, style: 'goldenEgg', originalColor: true },
-  { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'SQUIDSHREDDER & OCTOSLAPPER QX-2', pos: [-5.12,.03,2], scale: 2.15, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/power-egg-pack/Obj_Sphere10.fbx', name: 'POWER EGG PACK', pos: [-5.43,3.51,2], scale: .6, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'OCTOSLAPPER QX-2 BASS', pos: [-5.15,.03,1.15], scale: 2.6, rot: Math.PI /2, geometrySide: -1, originalColor: true },
+  { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'SQUIDSHREDDER GUITAR', pos: [4.55,.03,-3.25], scale: 2.6, rot: Math.PI * 2, geometrySide: 1, originalColor: true },
   { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI, style: 'tv' },
   { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
   { url: '/models/sea-cucumber-phone/Fig_NamacoPhone.fbx', name: 'SEA-CUCUMBER PHONE', pos: [-5.05,1.95,0], scale: .68, rot: Math.PI * 2.7, style: 'phone' },
@@ -185,15 +190,49 @@ const assets = [
   { url: '/models/office-chair/scene.gltf', name: 'OFFICE CHAIR', pos: [-3.25,.03,-1.5], scale: 2.45, rot: Math.PI * 1.5, format: 'gltf' }
 ];
 
+function keepGeometrySide(object, side) {
+  object.traverse(child => {
+    if (!child.isMesh || !child.geometry.attributes.position) return;
+    const source = child.geometry.index ? child.geometry.toNonIndexed() : child.geometry;
+    const position = source.attributes.position;
+    const keptVertices = [];
+    for (let index = 0; index < position.count; index += 3) {
+      const centerX = (position.getX(index) + position.getX(index + 1) + position.getX(index + 2)) / 3;
+      if (centerX * side > 0) keptVertices.push(index, index + 1, index + 2);
+    }
+    if (!keptVertices.length) {
+      child.visible = false;
+      return;
+    }
+    const geometry = new THREE.BufferGeometry();
+    for (const [name, attribute] of Object.entries(source.attributes)) {
+      const values = new attribute.array.constructor(keptVertices.length * attribute.itemSize);
+      keptVertices.forEach((sourceIndex, targetIndex) => {
+        for (let component = 0; component < attribute.itemSize; component++) {
+          values[targetIndex * attribute.itemSize + component] = attribute.array[sourceIndex * attribute.itemSize + component];
+        }
+      });
+      geometry.setAttribute(name, new THREE.BufferAttribute(values, attribute.itemSize, attribute.normalized));
+    }
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
+    child.geometry = geometry;
+  });
+}
+
 function fitAndPlace(object, item) {
+  if (item.geometrySide) keepGeometrySide(object, item.geometrySide);
   let bounds = new THREE.Box3().setFromObject(object);
   const size = bounds.getSize(new THREE.Vector3());
   const factor = item.scale / Math.max(size.x, size.y, size.z);
   // Preserve unit conversion already applied by format loaders (DAE commonly uses 0.01).
   object.scale.multiplyScalar(factor);
-  if (item.rotX) {
+  if (item.rotX || item.standVertical) {
     const yaw = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), item.rot);
-    const tilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), item.rotX);
+    const tilt = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(1, 0, 0),
+      item.standVertical ? -Math.PI / 2 : item.rotX
+    );
     object.quaternion.copy(yaw).multiply(tilt);
   } else {
     object.rotation.y = item.rot;
@@ -217,7 +256,7 @@ function fitAndPlace(object, item) {
     const materials = Array.isArray(child.material) ? child.material : [child.material];
     for (const material of materials) {
       if (!material) continue;
-      const materialName = material.name.toLowerCase();
+      const materialName = (material.name || '').toLowerCase();
       if (item.style === 'sofa') {
         if (materialName.includes('sofa')) {
           // The couch atlas contains both fabric and wooden arms. Use the
@@ -315,10 +354,29 @@ assets.forEach(item => {
   const loader = item.format === 'glb' || item.format === 'gltf'
     ? gltfLoader
     : item.format === 'dae' ? colladaLoader : fbxLoader;
+  let completed = false;
+  const complete = () => {
+    if (completed) return;
+    completed = true;
+    clearTimeout(timeout);
+    finishAssetLoad();
+  };
+  const timeout = setTimeout(() => {
+    console.error(`Timed out while loading ${item.name}`);
+    complete();
+  }, 12000);
   loader.load(item.url, loadedAsset => {
-  fitAndPlace(loadedAsset.scene || loadedAsset, item);
-  finishAssetLoad();
-  }, undefined, error => { console.error(`Could not load ${item.name}`, error); finishAssetLoad(); });
+    try {
+      fitAndPlace(loadedAsset.scene || loadedAsset, item);
+    } catch (error) {
+      console.error(`Could not place ${item.name}`, error);
+    } finally {
+      complete();
+    }
+  }, undefined, error => {
+    console.error(`Could not load ${item.name}`, error);
+    complete();
+  });
 });
 
 const raycaster = new THREE.Raycaster();

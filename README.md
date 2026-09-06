@@ -21,6 +21,8 @@ npm run dev
 - Clam — Splatoon 2 asset 313322
 - Super Sea Snails — Splatoon 2 asset 317412
 - Squidshredder & Octoslapper QX-2 — Splatoon 2 asset 317407
+- Power Egg Pack — Splatoon 3 asset 337061
+- Cereal — Splatoon 3 asset 337417
 
 These Nintendo assets are included for a non-commercial fan prototype. They should not be treated as original or commercially licensed project assets.
 
