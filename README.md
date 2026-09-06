@@ -31,3 +31,4 @@ These Nintendo assets are included for a non-commercial fan prototype. They shou
 
 - [Office Chair](https://sketchfab.com/3d-models/office-chair-b228a29fa84544c2be501c295653ffe7) by [Red Fox / nokillnando](https://sketchfab.com/nokillnando), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/). Textures were resized for web delivery.
 - [Desk lamp](https://sketchfab.com/3d-models/desk-lamp-7377ec591df04445a1aae370017aaa13) by [KaramellGlass](https://sketchfab.com/KaramellGlass), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+- [Smallfry](https://sketchfab.com/3d-models/smallfry-105ff70a7a8347bbbc22ec31249aebf3) by [Pikachar1274567](https://sketchfab.com/pikacharbutag), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).

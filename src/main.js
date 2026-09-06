@@ -196,6 +196,7 @@ const assets = [
   { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'OCTOSLAPPER QX-2 BASS', pos: [-5.15,.03,1.15], scale: 2.6, rot: Math.PI /2, geometrySide: -1, originalColor: true },
   { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'SQUIDSHREDDER GUITAR', pos: [4.55,.03,-3.25], scale: 2.6, rot: Math.PI * 2, geometrySide: 1, originalColor: true },
   { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI, style: 'tv' },
+  { url: '/models/little-salmon/scene.gltf', name: 'SMALLFRY', pos: [2.4,1.9,1.9], scale: .78, rot: Math.PI * .85, format: 'gltf' },
   { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
   { url: '/models/sea-cucumber-phone/Fig_NamacoPhone.fbx', name: 'SEA-CUCUMBER PHONE', pos: [-5.05,1.95,0], scale: .68, rot: Math.PI * 2.7, style: 'phone' },
   { url: '/models/haikara-magazine.glb', name: 'HAIKARAWALKER MAGAZINE', pos: [-4.3,1.8,-2.9], scale: 1.1, rot: .9, rotX: Math.PI * 1.556 , format: 'glb' },
