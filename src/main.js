@@ -256,13 +256,32 @@ function makeSofaWallPhoto() {
   return photo;
 }
 
-scene.add(new THREE.HemisphereLight(0xfffaf4, 0x918891, 1.68));
+const hemisphereLight = new THREE.HemisphereLight(0xfffaf4, 0x918891, 1.68); scene.add(hemisphereLight);
 const key = new THREE.DirectionalLight(0xfff5e8, 2.05); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
 const purpleLight = new THREE.PointLight(PURPLE, 4.5, 10); purpleLight.position.set(-4, 3.5, -1.5); scene.add(purpleLight);
 const shelfLight = new THREE.PointLight(0xffffff, 2.25, 4.5, 2); shelfLight.position.set(-4.35, 4.65, 2); scene.add(shelfLight);
 const windowGlow = new THREE.PointLight(0xb4a8b9, 1.8, 5); windowGlow.position.set(-1.55, 3.3, -3.8); scene.add(windowGlow);
 const subWeaponLight = new THREE.PointLight(0xd8b7ef, 2.5, 6.5, 2); subWeaponLight.position.set(3.2, 1.8, 3.25); scene.add(subWeaponLight);
 const tvFillLight = new THREE.PointLight(0xeee5f5, 8, 6.5, 1.5); tvFillLight.position.set(2.75, 2.35, .45); scene.add(tvFillLight);
+
+const roomLights = [hemisphereLight, key, purpleLight, shelfLight, windowGlow, subWeaponLight, tvFillLight];
+const roomLightIntensities = roomLights.map(light => light.intensity);
+const roomLightSlider = document.querySelector('#roomLight');
+const roomLightValue = document.querySelector('#roomLightValue');
+roomLightSlider.addEventListener('input', () => {
+  const level = Number(roomLightSlider.value);
+  const scales = [
+    .25 + level * .75, // Keep ambient fill restrained to preserve surface color.
+    level,             // The main ceiling light carries most of the adjustment.
+    .55 + level * .45,
+    .8 + level * .2,
+    .8 + level * .2,
+    .8 + level * .2,
+    .8 + level * .2
+  ];
+  roomLights.forEach((light, index) => { light.intensity = roomLightIntensities[index] * scales[index]; });
+  roomLightValue.value = `${Math.round(level * 100)}%`;
+});
 
 const interactables = [];
 interactables.push(makeWindow());
