@@ -25,15 +25,16 @@
     </aside>
     <div class="controls">DRAG TO ORBIT&nbsp;&nbsp;·&nbsp;&nbsp;SCROLL TO ZOOM</div>
     <div class="asset-tag" id="assetTag"></div>
-    <section class="music-panel" id="musicPanel" aria-hidden="true" aria-label="Mr. Grizz music player">
+    <section class="music-panel" id="musicPanel" aria-hidden="true" aria-label="Boombox music player">
       <div class="music-panel__head">
-        <div><small>GRIZZCO RADIO</small><h2>Squid Sisters</h2></div>
+        <div><small>BOOMBOX RADIO</small><h2>Squid Music</h2></div>
         <button class="music-close" id="musicClose" type="button" aria-label="Close music player">×</button>
       </div>
       <p class="music-note">Choose a track from the built-in room playlist, or add audio from your device.</p>
       <div class="music-actions">
         <label class="music-files" for="musicFiles">＋ ADD TRACKS</label>
         <input id="musicFiles" type="file" accept="audio/*" multiple hidden />
+        <button class="favorite-filter" id="musicFavorites" type="button" aria-pressed="false">♡ FAVORITES</button>
         <a href="https://music.nintendo.com/en-US/playlist/9eead8c7-d347-4979-a5cd-8158c67b6b93/" target="_blank" rel="noreferrer">OFFICIAL PLAYLIST ↗</a>
       </div>
       <ol class="track-list" id="trackList"><li class="track-empty">Loading room playlist…</li></ol>

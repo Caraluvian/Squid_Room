@@ -295,9 +295,9 @@ const loadBar = document.querySelector('.loader i');
 const fbxLoader = new FBXLoader();
 const gltfLoader = new GLTFLoader();
 const colladaLoader = new ColladaLoader();
-let mrGrizzObject = null;
-let mrGrizzRestPosition = null;
-const mrGrizzMaterials = [];
+let musicPropObject = null;
+let musicPropRestPosition = null;
+const musicPropMaterials = [];
 const phoneEmissiveMap = new THREE.TextureLoader().load('/models/sea-cucumber-phone/m_body_emm.png');
 phoneEmissiveMap.colorSpace = THREE.SRGBColorSpace;
 const goldenEggEmissiveMap = new THREE.TextureLoader().load('/models/golden-egg-s2/M_CoopIkuraDrop_Core_Emm.png');
@@ -333,8 +333,8 @@ const assets = [
   { url: '/models/cereal-01/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 2', pos: [-5.43,4.41,2.88], scale: .36, rot: Math.PI / 2, originalColor: true },
   { url: '/models/cereal-02/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 3', pos: [-5.43,4.41,3.16], scale: .36, rot: Math.PI / 2, originalColor: true },
   { url: '/models/sardinium-gray/Obj_WeaponParts.fbx', name: 'GRAY SARDINIUM', pos: [-5.43,4.41,2.2], scale: .52, rot: Math.PI / 2, originalColor: true },
-  { url: '/models/mr-grizz/Obj_KumasanRadio.fbx', name: 'MR. GRIZZ', pos: [-5.43,3.51,1.18], scale: .9, rot: Math.PI / 2, style: 'mrGrizz', originalColor: true },
-  // { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, originalColor: true },
+  // { url: '/models/mr-grizz/Obj_KumasanRadio.fbx', name: 'MR. GRIZZ', pos: [-5.43,3.51,1.18], scale: .9, rot: Math.PI / 2, style: 'mrGrizz', originalColor: true },
+  { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, style: 'musicPlayer', originalColor: true },
   { url: '/models/super-sea-snails/Obj_PlazaTurbanshells.dae', name: 'SUPER SEA SNAILS', pos: [-5.43,3.51,2], scale: .62, rot: Math.PI / 2, format: 'dae', originalColor: true },
   { url: '/models/golden-egg-s2/Obj_CoopIkuraDrop.fbx', name: 'GOLDEN EGG', pos: [-5.43,3.51,2.78], scale: .62, rot: Math.PI / 2, style: 'goldenEgg', originalColor: true },
   { url: '/models/power-egg-pack/Obj_Sphere10.fbx', name: 'POWER EGG PACK', pos: [-5.43,3.51,2], scale: .6, rot: Math.PI / 2, originalColor: true },
@@ -471,9 +471,10 @@ function fitAndPlace(object, item) {
     object.updateMatrixWorld(true);
   }
   object.userData.label = item.name;
-  if (item.style === 'mrGrizz') {
-    mrGrizzObject = object;
-    mrGrizzRestPosition = object.position.clone();
+  if (item.style === 'musicPlayer') {
+    object.userData.musicPlayer = true;
+    musicPropObject = object;
+    musicPropRestPosition = object.position.clone();
   }
   object.traverse(child => {
     if (!child.isMesh) return;
@@ -571,13 +572,13 @@ function fitAndPlace(object, item) {
         }
       }
       if (item.originalColor && material.map) material.color.set(0xffffff);
-      if (item.style === 'mrGrizz') {
+      if (item.style === 'musicPlayer') {
         material.color.multiplyScalar(1.08);
         if (material.map && material.emissive) {
           material.emissiveMap = material.map;
           material.emissive.set(0x725d73);
           material.emissiveIntensity = .24;
-          mrGrizzMaterials.push(material);
+          musicPropMaterials.push(material);
         }
       }
       if (item.style === 'subWeapon') {
@@ -696,6 +697,7 @@ const musicPlay = document.querySelector('#musicPlay');
 const musicProgress = document.querySelector('#musicProgress');
 const musicCurrent = document.querySelector('#musicCurrent');
 const musicDuration = document.querySelector('#musicDuration');
+const musicFavorites = document.querySelector('#musicFavorites');
 const audioPlayer = new Audio();
 audioPlayer.volume = Number(document.querySelector('#musicVolume').value);
 const builtInTrackFiles = [
@@ -740,6 +742,21 @@ const builtInTracks = builtInTrackFiles.map(([name, file]) => ({
 }));
 let musicTracks = [...builtInTracks];
 let currentTrack = -1;
+let favoriteOnly = false;
+let favoriteTrackNames = new Set();
+try {
+  favoriteTrackNames = new Set(JSON.parse(localStorage.getItem('squid-room-favorite-tracks') || '[]'));
+} catch {
+  favoriteTrackNames = new Set();
+}
+
+function saveFavorites() {
+  try {
+    localStorage.setItem('squid-room-favorite-tracks', JSON.stringify([...favoriteTrackNames]));
+  } catch {
+    // Favorites still work for this session when persistent storage is blocked.
+  }
+}
 
 function formatAudioTime(seconds) {
   if (!Number.isFinite(seconds)) return '0:00';
@@ -748,21 +765,38 @@ function formatAudioTime(seconds) {
 
 function updateTrackList() {
   trackList.replaceChildren();
-  if (!musicTracks.length) {
+  const visibleTracks = musicTracks
+    .map((track, index) => ({ track, index }))
+    .filter(({ track }) => !favoriteOnly || favoriteTrackNames.has(track.name));
+  if (!visibleTracks.length) {
     const empty = document.createElement('li');
     empty.className = 'track-empty';
-    empty.textContent = 'No local tracks selected';
+    empty.textContent = favoriteOnly ? 'No favorite tracks yet' : 'No tracks selected';
     trackList.appendChild(empty);
     return;
   }
-  musicTracks.forEach((track, index) => {
+  visibleTracks.forEach(({ track, index }) => {
     const row = document.createElement('li');
     row.classList.toggle('active', index === currentTrack);
     const select = document.createElement('button');
     select.type = 'button';
+    select.className = 'track-select';
     select.textContent = `${String(index + 1).padStart(2, '0')}  ${track.name}`;
     select.addEventListener('click', () => loadTrack(index, true));
-    row.appendChild(select);
+    const favorite = document.createElement('button');
+    const isFavorite = favoriteTrackNames.has(track.name);
+    favorite.type = 'button';
+    favorite.className = `track-favorite${isFavorite ? ' active' : ''}`;
+    favorite.textContent = isFavorite ? '♥' : '♡';
+    favorite.setAttribute('aria-label', `${isFavorite ? 'Remove' : 'Add'} ${track.name} ${isFavorite ? 'from' : 'to'} favorites`);
+    favorite.setAttribute('aria-pressed', String(isFavorite));
+    favorite.addEventListener('click', () => {
+      if (favoriteTrackNames.has(track.name)) favoriteTrackNames.delete(track.name);
+      else favoriteTrackNames.add(track.name);
+      saveFavorites();
+      updateTrackList();
+    });
+    row.append(select, favorite);
     trackList.appendChild(row);
   });
 }
@@ -778,7 +812,16 @@ function loadTrack(index, autoplay = false) {
 
 function stepTrack(direction) {
   if (!musicTracks.length) return;
-  loadTrack(currentTrack + direction, true);
+  const playableIndexes = musicTracks
+    .map((track, index) => ({ track, index }))
+    .filter(({ track }) => !favoriteOnly || favoriteTrackNames.has(track.name))
+    .map(({ index }) => index);
+  if (!playableIndexes.length) return;
+  const currentPosition = playableIndexes.indexOf(currentTrack);
+  const nextPosition = currentPosition < 0
+    ? 0
+    : (currentPosition + direction + playableIndexes.length) % playableIndexes.length;
+  loadTrack(playableIndexes[nextPosition], true);
 }
 
 function setPlayerState() {
@@ -807,6 +850,13 @@ musicPlay.addEventListener('click', () => {
 });
 document.querySelector('#musicPrevious').addEventListener('click', () => stepTrack(-1));
 document.querySelector('#musicNext').addEventListener('click', () => stepTrack(1));
+musicFavorites.addEventListener('click', () => {
+  favoriteOnly = !favoriteOnly;
+  musicFavorites.classList.toggle('active', favoriteOnly);
+  musicFavorites.setAttribute('aria-pressed', String(favoriteOnly));
+  musicFavorites.textContent = `${favoriteOnly ? '♥' : '♡'} FAVORITES`;
+  updateTrackList();
+});
 document.querySelector('#musicVolume').addEventListener('input', event => { audioPlayer.volume = Number(event.target.value); });
 document.querySelector('#musicClose').addEventListener('click', () => {
   musicPanel.classList.remove('open');
@@ -842,7 +892,7 @@ renderer.domElement.addEventListener('click', event => {
   raycaster.setFromCamera(pointer, camera);
   const hit = raycaster.intersectObjects(interactables, true)[0];
   const root = hit && (hit.object.userData.root || hit.object);
-  if (root?.userData.label === 'MR. GRIZZ') {
+  if (root?.userData.musicPlayer) {
     musicPanel.classList.add('open');
     musicPanel.setAttribute('aria-hidden', 'false');
   }
@@ -859,16 +909,16 @@ function animate() {
   const elapsed = clock.getElapsedTime();
   purpleLight.intensity = 4.25 + Math.sin(elapsed * 1.7) * .25;
   const musicPlaying = !audioPlayer.paused && !audioPlayer.ended;
-  if (mrGrizzObject && mrGrizzRestPosition) {
+  if (musicPropObject && musicPropRestPosition) {
     if (musicPlaying) {
-      mrGrizzObject.position.copy(mrGrizzRestPosition);
-      mrGrizzObject.position.x += Math.sin(elapsed * 28) * .012;
-      mrGrizzObject.position.y += Math.abs(Math.sin(elapsed * 18)) * .014;
+      musicPropObject.position.copy(musicPropRestPosition);
+      musicPropObject.position.x += Math.sin(elapsed * 28) * .012;
+      musicPropObject.position.y += Math.abs(Math.sin(elapsed * 18)) * .014;
     } else {
-      mrGrizzObject.position.lerp(mrGrizzRestPosition, .18);
+      musicPropObject.position.lerp(musicPropRestPosition, .18);
     }
     const glow = .24 + (musicPlaying ? .22 + Math.sin(elapsed * 5) * .07 : 0);
-    mrGrizzMaterials.forEach(material => { material.emissiveIntensity = glow; });
+    musicPropMaterials.forEach(material => { material.emissiveIntensity = glow; });
   }
   renderer.render(scene, camera);
 }
