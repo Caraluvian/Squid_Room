@@ -295,6 +295,9 @@ const loadBar = document.querySelector('.loader i');
 const fbxLoader = new FBXLoader();
 const gltfLoader = new GLTFLoader();
 const colladaLoader = new ColladaLoader();
+let mrGrizzObject = null;
+let mrGrizzRestPosition = null;
+const mrGrizzMaterials = [];
 const phoneEmissiveMap = new THREE.TextureLoader().load('/models/sea-cucumber-phone/m_body_emm.png');
 phoneEmissiveMap.colorSpace = THREE.SRGBColorSpace;
 const goldenEggEmissiveMap = new THREE.TextureLoader().load('/models/golden-egg-s2/M_CoopIkuraDrop_Core_Emm.png');
@@ -330,7 +333,7 @@ const assets = [
   { url: '/models/cereal-01/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 2', pos: [-5.43,4.41,2.88], scale: .36, rot: Math.PI / 2, originalColor: true },
   { url: '/models/cereal-02/Fig_CerealBox00.fbx', name: 'CEREAL — COLOR 3', pos: [-5.43,4.41,3.16], scale: .36, rot: Math.PI / 2, originalColor: true },
   { url: '/models/sardinium-gray/Obj_WeaponParts.fbx', name: 'GRAY SARDINIUM', pos: [-5.43,4.41,2.2], scale: .52, rot: Math.PI / 2, originalColor: true },
-  { url: '/models/mr-grizz/Obj_KumasanRadio.fbx', name: 'MR. GRIZZ', pos: [-5.43,3.51,1.18], scale: .9, rot: Math.PI / 2, originalColor: true },
+  { url: '/models/mr-grizz/Obj_KumasanRadio.fbx', name: 'MR. GRIZZ', pos: [-5.43,3.51,1.18], scale: .9, rot: Math.PI / 2, style: 'mrGrizz', originalColor: true },
   // { url: '/models/maries-boombox/Obj_IdolBoombox.fbx', name: "MARIE'S BOOM BOX", pos: [-5.43,3.51,1.18], scale: .68, rot: Math.PI / 2, originalColor: true },
   { url: '/models/super-sea-snails/Obj_PlazaTurbanshells.dae', name: 'SUPER SEA SNAILS', pos: [-5.43,3.51,2], scale: .62, rot: Math.PI / 2, format: 'dae', originalColor: true },
   { url: '/models/golden-egg-s2/Obj_CoopIkuraDrop.fbx', name: 'GOLDEN EGG', pos: [-5.43,3.51,2.78], scale: .62, rot: Math.PI / 2, style: 'goldenEgg', originalColor: true },
@@ -468,6 +471,10 @@ function fitAndPlace(object, item) {
     object.updateMatrixWorld(true);
   }
   object.userData.label = item.name;
+  if (item.style === 'mrGrizz') {
+    mrGrizzObject = object;
+    mrGrizzRestPosition = object.position.clone();
+  }
   object.traverse(child => {
     if (!child.isMesh) return;
     child.castShadow = true;
@@ -564,6 +571,15 @@ function fitAndPlace(object, item) {
         }
       }
       if (item.originalColor && material.map) material.color.set(0xffffff);
+      if (item.style === 'mrGrizz') {
+        material.color.multiplyScalar(1.08);
+        if (material.map && material.emissive) {
+          material.emissiveMap = material.map;
+          material.emissive.set(0x725d73);
+          material.emissiveIntensity = .24;
+          mrGrizzMaterials.push(material);
+        }
+      }
       if (item.style === 'subWeapon') {
         const inkTint = new THREE.Color(item.tint);
         const tintVector = `${inkTint.r.toFixed(3)}, ${inkTint.g.toFixed(3)}, ${inkTint.b.toFixed(3)}`;
@@ -673,6 +689,144 @@ assets.forEach(item => {
   });
 });
 
+const musicPanel = document.querySelector('#musicPanel');
+const musicFiles = document.querySelector('#musicFiles');
+const trackList = document.querySelector('#trackList');
+const musicPlay = document.querySelector('#musicPlay');
+const musicProgress = document.querySelector('#musicProgress');
+const musicCurrent = document.querySelector('#musicCurrent');
+const musicDuration = document.querySelector('#musicDuration');
+const audioPlayer = new Audio();
+audioPlayer.volume = Number(document.querySelector('#musicVolume').value);
+const builtInTrackFiles = [
+  ['Anarchy Rainbow', 'Anarchy Rainbow.mp3'],
+  ['Anarchy Rainbow (Alt)', 'Anarchy Rainbow__.mp3'],
+  ['Bear With Me', 'Bear With Me_.mp3'],
+  ['Blop Bop', 'Blop Bop__.mp3'],
+  ['Calamari Inkantation 3MIX', 'Calamari Inkantation 3MIX__.mp3'],
+  ['City of Color', 'City of Color.mp3'],
+  ['Color Pulse (2024)', 'Color Pulse (2024)_.mp3'],
+  ['Daybreaker Anthem', 'Daybreaker Anthem__.mp3'],
+  ['Deepers Creepers', 'Deepers Creepers__.mp3'],
+  ['Dressed to Krill', 'Dressed to Krill__.mp3'],
+  ['Drip Feed', 'Drip Feed__.mp3'],
+  ['Fresh Start', 'Fresh Start_.mp3'],
+  ['Fuzzy Dazzler', 'Fuzzy Dazzler.mp3'],
+  ['Fuzzy Dazzler (Alt)', 'Fuzzy Dazzler__.mp3'],
+  ['Gilded Cage', 'Gilded Cage__.mp3'],
+  ['Heliocentri City', 'Heliocentri City__.mp3'],
+  ['Inkopolis Plaza — Grizzco Jingle', 'Inkopolis Plaza - Grizzco Jingle_.mp3'],
+  ['Into the Light (After-Fest Mix)', 'Into the Light (After-Fest Mix)_.mp3'],
+  ['Liquid Sunshine', 'Liquid Sunshine__.mp3'],
+  ["Lobby — Crab 'n' Go (FrostyFest)", "Lobby - Crab 'n' Go (FrostyFest)__.mp3"],
+  ["Lobby — Crab 'n' Go (SpringFest)", "Lobby - Crab 'n' Go (SpringFest)_.mp3"],
+  ['Maritime Memory', 'Maritime Memory.mp3'],
+  ['Meadowlark', 'Meadowlark_.mp3'],
+  ["Pop 'n' Schlock", "Pop 'n' Schlock__.mp3"],
+  ['Pour It On', 'Pour It On__.mp3'],
+  ['Short Order', 'Short Order_.mp3'],
+  ['Sinkopated', 'Sinkopated__.mp3'],
+  ['Splatsville — Lobby (SpringFest)', 'Splatsville - Lobby (SpringFest)_.mp3'],
+  ['Three Wishes (Main Stage)', 'Three Wishes (Main Stage)_.mp3'],
+  ["Tomorrow's Nostalgia Today", "Tomorrow's Nostalgia Today__.mp3"],
+  ['Wave Goodbye', 'Wave Goodbye.mp3'],
+  ["We're So Back", "We're So Back_.mp3"],
+  ['GF Live — Spicy Calamari Inkantation', '~GF Live~ Spicy Calamari Inkantation_.mp3']
+];
+const builtInTracks = builtInTrackFiles.map(([name, file]) => ({
+  name,
+  url: encodeURI(`/audio/mr-grizz/${file}`),
+  objectUrl: false
+}));
+let musicTracks = [...builtInTracks];
+let currentTrack = -1;
+
+function formatAudioTime(seconds) {
+  if (!Number.isFinite(seconds)) return '0:00';
+  return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+}
+
+function updateTrackList() {
+  trackList.replaceChildren();
+  if (!musicTracks.length) {
+    const empty = document.createElement('li');
+    empty.className = 'track-empty';
+    empty.textContent = 'No local tracks selected';
+    trackList.appendChild(empty);
+    return;
+  }
+  musicTracks.forEach((track, index) => {
+    const row = document.createElement('li');
+    row.classList.toggle('active', index === currentTrack);
+    const select = document.createElement('button');
+    select.type = 'button';
+    select.textContent = `${String(index + 1).padStart(2, '0')}  ${track.name}`;
+    select.addEventListener('click', () => loadTrack(index, true));
+    row.appendChild(select);
+    trackList.appendChild(row);
+  });
+}
+
+function loadTrack(index, autoplay = false) {
+  if (!musicTracks.length) return;
+  currentTrack = (index + musicTracks.length) % musicTracks.length;
+  audioPlayer.src = musicTracks[currentTrack].url;
+  audioPlayer.load();
+  updateTrackList();
+  if (autoplay) audioPlayer.play().catch(() => {});
+}
+
+function stepTrack(direction) {
+  if (!musicTracks.length) return;
+  loadTrack(currentTrack + direction, true);
+}
+
+function setPlayerState() {
+  const playing = !audioPlayer.paused && !audioPlayer.ended;
+  musicPlay.textContent = playing ? '❚❚' : '▶';
+  musicPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  musicPanel.classList.toggle('playing', playing);
+}
+
+musicFiles.addEventListener('change', () => {
+  musicTracks.filter(track => track.objectUrl).forEach(track => URL.revokeObjectURL(track.url));
+  const addedTracks = Array.from(musicFiles.files, file => ({
+    name: file.name.replace(/\.[^.]+$/, ''),
+    url: URL.createObjectURL(file),
+    objectUrl: true
+  }));
+  musicTracks = [...builtInTracks, ...addedTracks];
+  currentTrack = -1;
+  updateTrackList();
+  if (musicTracks.length) loadTrack(0);
+});
+musicPlay.addEventListener('click', () => {
+  if (!musicTracks.length) { musicFiles.click(); return; }
+  if (audioPlayer.paused) audioPlayer.play().catch(() => {});
+  else audioPlayer.pause();
+});
+document.querySelector('#musicPrevious').addEventListener('click', () => stepTrack(-1));
+document.querySelector('#musicNext').addEventListener('click', () => stepTrack(1));
+document.querySelector('#musicVolume').addEventListener('input', event => { audioPlayer.volume = Number(event.target.value); });
+document.querySelector('#musicClose').addEventListener('click', () => {
+  musicPanel.classList.remove('open');
+  musicPanel.setAttribute('aria-hidden', 'true');
+});
+musicProgress.addEventListener('input', () => {
+  if (Number.isFinite(audioPlayer.duration)) audioPlayer.currentTime = musicProgress.value / 1000 * audioPlayer.duration;
+});
+audioPlayer.addEventListener('loadedmetadata', () => { musicDuration.textContent = formatAudioTime(audioPlayer.duration); });
+audioPlayer.addEventListener('timeupdate', () => {
+  musicCurrent.textContent = formatAudioTime(audioPlayer.currentTime);
+  musicProgress.value = Number.isFinite(audioPlayer.duration) && audioPlayer.duration > 0
+    ? Math.round(audioPlayer.currentTime / audioPlayer.duration * 1000) : 0;
+});
+audioPlayer.addEventListener('play', setPlayerState);
+audioPlayer.addEventListener('pause', setPlayerState);
+audioPlayer.addEventListener('ended', () => stepTrack(1));
+updateTrackList();
+loadTrack(0);
+
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 addEventListener('pointermove', event => {
@@ -682,11 +836,40 @@ addEventListener('pointermove', event => {
   if (hit) { const root = hit.object.userData.root || hit.object; assetTag.textContent = root.userData.label; assetTag.style.display = 'block'; assetTag.style.left = `${event.clientX + 14}px`; assetTag.style.top = `${event.clientY + 14}px`; document.body.style.cursor = 'pointer'; }
   else { assetTag.style.display = 'none'; document.body.style.cursor = ''; }
 });
+renderer.domElement.addEventListener('click', event => {
+  pointer.x = event.clientX / innerWidth * 2 - 1;
+  pointer.y = -(event.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(interactables, true)[0];
+  const root = hit && (hit.object.userData.root || hit.object);
+  if (root?.userData.label === 'MR. GRIZZ') {
+    musicPanel.classList.add('open');
+    musicPanel.setAttribute('aria-hidden', 'false');
+  }
+});
 
 document.querySelector('#enter').addEventListener('click', () => { document.querySelector('.intro').classList.add('hidden'); controls.autoRotate = false; });
 renderer.domElement.addEventListener('pointerdown', () => { controls.autoRotate = false; });
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
 
 const clock = new THREE.Clock();
-function animate() { requestAnimationFrame(animate); controls.update(); purpleLight.intensity = 4.25 + Math.sin(clock.getElapsedTime()*1.7) * .25; renderer.render(scene, camera); }
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  const elapsed = clock.getElapsedTime();
+  purpleLight.intensity = 4.25 + Math.sin(elapsed * 1.7) * .25;
+  const musicPlaying = !audioPlayer.paused && !audioPlayer.ended;
+  if (mrGrizzObject && mrGrizzRestPosition) {
+    if (musicPlaying) {
+      mrGrizzObject.position.copy(mrGrizzRestPosition);
+      mrGrizzObject.position.x += Math.sin(elapsed * 28) * .012;
+      mrGrizzObject.position.y += Math.abs(Math.sin(elapsed * 18)) * .014;
+    } else {
+      mrGrizzObject.position.lerp(mrGrizzRestPosition, .18);
+    }
+    const glow = .24 + (musicPlaying ? .22 + Math.sin(elapsed * 5) * .07 : 0);
+    mrGrizzMaterials.forEach(material => { material.emissiveIntensity = glow; });
+  }
+  renderer.render(scene, camera);
+}
 animate();

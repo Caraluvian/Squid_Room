@@ -25,9 +25,34 @@ button:hover { transform: translate(-2px, -2px); }
 button span { margin-left: 28px; }
 .controls { position: fixed; right: 32px; bottom: 26px; z-index: 5; color: #715e7d; font-size: 9px; letter-spacing: .12em; }
 .asset-tag { position: fixed; z-index: 6; pointer-events: none; display: none; color: #4e3a5d; background: #ffffff; padding: 7px 10px; font-size: 10px; font-weight: 700; box-shadow: 3px 3px 0 #b995d9; }
+.music-panel { position: fixed; right: 32px; top: 104px; z-index: 9; width: min(370px, calc(100vw - 40px)); padding: 18px; color: #f8effc; background: rgba(48,35,55,.96); border: 2px solid #d893ea; box-shadow: 8px 8px 0 rgba(105,64,119,.45); transform: translateX(calc(100% + 50px)); opacity: 0; pointer-events: none; transition: transform .28s ease, opacity .28s ease; }
+.music-panel.open { transform: none; opacity: 1; pointer-events: auto; }
+.music-panel.playing { box-shadow: 0 0 22px rgba(230,112,239,.6), 8px 8px 0 rgba(105,64,119,.45); }
+.music-panel__head { display: flex; align-items: flex-start; justify-content: space-between; }
+.music-panel small { color: #d9a5e4; font-size: 9px; font-weight: 700; letter-spacing: .18em; }
+.music-panel h2 { margin: 2px 0 0; color: #fff; font: 24px "Archivo Black", sans-serif; text-transform: uppercase; }
+.music-panel button { margin: 0; padding: 8px 10px; box-shadow: none; }
+.music-close { color: #eadbec !important; background: transparent !important; font-size: 22px !important; line-height: 1; }
+.music-note { margin: 14px 0; color: #cabdce; font-size: 10px; line-height: 1.55; }
+.music-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.music-files, .music-actions a { color: #fff; font-size: 9px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.music-files { padding: 8px 10px; background: #9a55ae; }
+.music-actions a { color: #d9a5e4; }
+.track-list { max-height: 150px; margin: 14px 0; padding: 0; overflow: auto; list-style: none; border-top: 1px solid #705d76; }
+.track-list li { border-bottom: 1px solid #705d76; }
+.track-list button { width: 100%; overflow: hidden; color: #d8cbdc; background: transparent; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.track-list button:hover, .track-list li.active button { color: #fff; background: #744481; transform: none; }
+.track-empty { padding: 12px 8px; color: #9f91a3; font-size: 10px; }
+.music-progress > input { width: 100%; accent-color: #d86ee9; }
+.music-progress > div { display: flex; justify-content: space-between; color: #b9abbc; font-size: 9px; }
+.music-controls { display: flex; align-items: center; gap: 7px; margin-top: 10px; }
+.music-controls button { background: #795284; }
+.music-controls .music-play { background: #bd62d1; font-size: 15px; }
+.music-volume { display: flex; align-items: center; gap: 7px; margin-left: auto; color: #cbbdce; font-size: 9px; font-weight: 700; }
+.music-volume input { width: 72px; accent-color: #d86ee9; }
 .loader { position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; gap: 15px; background: #d8d3d8; transition: opacity .6s, visibility .6s; }
 .loader.done { opacity: 0; visibility: hidden; }
 .loader b { font-size: 11px; letter-spacing: .2em; }
 .loader span { width: 240px; height: 5px; background: #ded2e8; }
 .loader i { display: block; width: 8%; height: 100%; background: #8f7891; transition: width .25s; }
-@media (max-width: 720px) { .intro { left: 24px; top: auto; bottom: 70px; transform: none; width: calc(100% - 48px); } .intro.hidden { transform: translateY(25px); } h1 { font-size: 48px; } .lede { display: none; } .hud { padding: 22px; } .light-control { grid-template-columns: auto 88px; } .light-control input { width: 88px; } .light-control output { display: none; } .controls { right: 20px; bottom: 18px; } }
+@media (max-width: 720px) { .intro { left: 24px; top: auto; bottom: 70px; transform: none; width: calc(100% - 48px); } .intro.hidden { transform: translateY(25px); } h1 { font-size: 48px; } .lede { display: none; } .hud { padding: 22px; } .light-control { grid-template-columns: auto 88px; } .light-control input { width: 88px; } .light-control output { display: none; } .music-panel { top: 92px; right: 20px; } .controls { right: 20px; bottom: 18px; } }
