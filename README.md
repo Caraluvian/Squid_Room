@@ -32,6 +32,15 @@ npm run dev
 - Dynamo Roller — Splatoon 3 asset 342248
 - Super Sea Snails Case — Splatoon 3 asset 337084
 - E-liter 4K Scope — Splatoon 3 asset 342254
+- Autobomb — Splatoon 3 asset 344359
+- Suction Bomb — Splatoon 3 asset 344233
+- Sprinkler — Splatoon 3 asset 363056
+- Splat Bomb — Splatoon 3 asset 344356
+- Torpedo — Splatoon 3 asset 363057
+- Fizzy Bomb — Splatoon 3 asset 344360
+- Reefslider — Splatoon 3 asset 359647
+- Curling Bomb — Splatoon 3 asset 344358
+- Octagram Star — Splatoon 2 asset 316099
 
 These Nintendo assets are included for a non-commercial fan prototype. They should not be treated as original or commercially licensed project assets.
 
@@ -41,3 +50,4 @@ These Nintendo assets are included for a non-commercial fan prototype. They shou
 - [Desk lamp](https://sketchfab.com/3d-models/desk-lamp-7377ec591df04445a1aae370017aaa13) by [KaramellGlass](https://sketchfab.com/KaramellGlass), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
 - [Smallfry](https://sketchfab.com/3d-models/smallfry-105ff70a7a8347bbbc22ec31249aebf3) by [Pikachar1274567](https://sketchfab.com/pikacharbutag), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
 - [Cork Board Base](https://sketchfab.com/3d-models/cork-board-base-3da797d16dc34f2d8b9c7e862ef37515) by [nukepilled](https://sketchfab.com/nukepilled), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+- [Photo Frame](https://sketchfab.com/3d-models/photo-frame-66faf3c1f1414b80a056507e87a62db6) by [Alpha & Kayal](https://sketchfab.com/alpha_Arts), licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).

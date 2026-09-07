@@ -220,11 +220,49 @@ function makeCorkBoardArt() {
   return artwork;
 }
 
+function makeSofaWallPhoto() {
+  const photo = new THREE.Group();
+  photo.position.set(5.15, 4.48, -4.2);
+  photo.scale.setScalar(.85);
+  photo.userData.label = 'SPLATOON EXHIBIT PHOTO';
+  const texture = new THREE.TextureLoader().load('/textures/splatoon-exhibit-photo.jpeg');
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const print = new THREE.Mesh(
+    new THREE.PlaneGeometry(.89, 1.58),
+    new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
+  );
+  print.position.z = .025;
+  print.userData.root = photo;
+  photo.add(print);
+
+  const gold = new THREE.MeshStandardMaterial({
+    color: 0xb29445,
+    roughness: .38,
+    metalness: .38
+  });
+  for (const [size, position] of [
+    [[.97, .035, .025], [0, .81, .04]],
+    [[.97, .035, .025], [0, -.81, .04]],
+    [[.035, 1.655, .025], [-.465, 0, .04]],
+    [[.035, 1.655, .025], [.465, 0, .04]]
+  ]) {
+    const trim = new THREE.Mesh(new RoundedBoxGeometry(...size, 3, .008), gold);
+    trim.position.set(...position);
+    trim.castShadow = true;
+    trim.userData.root = photo;
+    photo.add(trim);
+  }
+  scene.add(photo);
+  return photo;
+}
+
 scene.add(new THREE.HemisphereLight(0xfffaf4, 0x918891, 1.68));
 const key = new THREE.DirectionalLight(0xfff5e8, 2.05); key.position.set(6, 10, 8); key.castShadow = true; key.shadow.mapSize.set(2048,2048); scene.add(key);
 const purpleLight = new THREE.PointLight(PURPLE, 4.5, 10); purpleLight.position.set(-4, 3.5, -1.5); scene.add(purpleLight);
 const shelfLight = new THREE.PointLight(0xffffff, 2.25, 4.5, 2); shelfLight.position.set(-4.35, 4.65, 2); scene.add(shelfLight);
 const windowGlow = new THREE.PointLight(0xb4a8b9, 1.8, 5); windowGlow.position.set(-1.55, 3.3, -3.8); scene.add(windowGlow);
+const subWeaponLight = new THREE.PointLight(0xd8b7ef, 2.5, 6.5, 2); subWeaponLight.position.set(3.2, 1.8, 3.25); scene.add(subWeaponLight);
+const tvFillLight = new THREE.PointLight(0xeee5f5, 8, 6.5, 1.5); tvFillLight.position.set(2.75, 2.35, .45); scene.add(tvFillLight);
 
 const interactables = [];
 interactables.push(makeWindow());
@@ -232,6 +270,7 @@ interactables.push(makeDesk());
 interactables.push(makeDeskShelf());
 interactables.push(makeSofaShelf());
 interactables.push(makeCorkBoardArt());
+interactables.push(makeSofaWallPhoto());
 const assetTag = document.querySelector('#assetTag');
 const loadBar = document.querySelector('.loader i');
 const fbxLoader = new FBXLoader();
@@ -255,9 +294,16 @@ const eliterRoughnessMap = new THREE.TextureLoader().load('/models/eliter-4k-sco
 const eliterMetalnessMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Body_Mtl.png');
 const eliterAoMap = new THREE.TextureLoader().load('/models/eliter-4k-scope/M_Body_Ao.png');
 eliterAoMap.channel = 0;
+const reefsliderBodyTeamMap = new THREE.TextureLoader().load('/models/reefslider/M_Body_Tcl.png');
+const reefsliderBottleTeamMap = new THREE.TextureLoader().load('/models/reefslider/M_Bottle_Tcl.png');
+const autobombTeamMap = new THREE.TextureLoader().load('/models/sub-weapons/autobomb/M_Body_Tcl.png');
+const curlingBombTeamMap = new THREE.TextureLoader().load('/models/sub-weapons/curling-bomb/M_Body_Tcl.png');
+const octagramStarEmissiveMap = new THREE.TextureLoader().load('/models/octagram-star/WallLightSteel_Emm.png');
+octagramStarEmissiveMap.colorSpace = THREE.SRGBColorSpace;
 const assets = [
   { url: '/models/couch/Obj_Sofa.fbx', name: 'COUCH', pos: [2.75,.03,-3.2], scale: 4.4, rot: Math.PI / 3, againstBackWall: true, style: 'sofa' },
   { url: '/models/eliter-4k-scope/Wmn_Charger_LongScope.fbx', name: 'E-LITER 4K SCOPE', pos: [2.75,3.64,-4.08], scale: 3, rot: Math.PI / 2, style: 'eliter', tankStretch: 1.16 },
+  { url: '/models/photo-frame/scene.gltf', name: 'SPLATOON PHOTO FRAME', pos: [5.15,3.77,-4.2], scale: 1.51, scaleX: .92, scaleY: .68, rot: 0, localRotZ: Math.PI / 2, format: 'gltf', style: 'photoFrame' },
   { url: '/models/squid-cushion/Fig_SquidCushion00.fbx', name: 'YELLOW SQUID CUSHION', pos: [2.7,.82,-2.5], scale: .92, rot: -.28, rotX: -Math.PI / 2, style: 'yellowDecor' },
   { url: '/models/zapfish/Obj_Namazu.fbx', name: 'YELLOW ZAPFISH', pos: [-5.43,4.41,1.8], scale: 1, rot: Math.PI / 2, originalColor: true },
   { url: '/models/clam/Obj_Clam_A.fbx', name: 'CLAM', pos: [-5.43,4.41,1.3], scale: .52, rot: Math.PI / 2, originalColor: true },
@@ -274,6 +320,13 @@ const assets = [
   // { url: '/models/dynamo-roller/Wmn_Roller_Heavy.fbx', name: 'DYNAMO ROLLER', pos: [-5.12,.03,3], scale: 2.4, rot: Math.PI * .5, localRotX: -.16, localRotZ: Math.PI, originalColor: true },
   { url: '/models/super-sea-snails-s3/Obj_PlazaTurbanshellCase.fbx', name: 'SUPER SEA SNAILS CASE', pos: [-5.12,.03,3], scale: 2.2, rot: Math.PI / 2, style: 'seaSnailsS3', originalColor: true },
   { url: '/models/splatoon-guitars/Obj_VenueGuitarBass.fbx', name: 'SQUIDSHREDDER GUITAR', pos: [4.55,.03,-3.25], scale: 2.6, rot: Math.PI * 2, geometrySide: 1, originalColor: true },
+  // { url: '/models/sub-weapons/autobomb/Wsb_Bomb_Robo.fbx', name: 'AUTOBOMB', pos: [1.45,.03,1.8], scale: 1, rot: Math.PI - .35, style: 'subWeapon', tint: 0xf065dd, teamMaps: { m_body: autobombTeamMap }, originalColor: true },
+  // { url: '/models/reefslider/Wsp_SkewerTackle.fbx', name: 'REEFSLIDER', pos: [2.75,.03,3.5], scale: 2.8, rot: Math.PI * .5, style: 'subWeapon', tint: 0x6668d9, teamMaps: { m_body: reefsliderBodyTeamMap, m_bottle: reefsliderBottleTeamMap }, originalColor: true },
+  // { url: '/models/sub-weapons/curling-bomb/Wsb_Bomb_Curling.fbx', name: 'CURLING BOMB', pos: [4.05,.03,1.8], scale: 1.1, rot: .35, style: 'subWeapon', tint: 0xf065dd, teamMaps: { m_body: curlingBombTeamMap }, originalColor: true },
+  // { url: '/models/octagram-star/Obj_DeliDebli_Star.fbx', name: 'OCTAGRAM STAR', pos: [1.45,.03,1.8], scale: 1, rot: -.35, style: 'octagramStar', originalColor: true },
+  { url: '/models/octagram-star/Obj_DeliDebli_Star.fbx', name: 'OCTAGRAM STAR', pos: [2.05,.03,2.9], scale: 1, rot: .48, style: 'octagramStar', originalColor: true },
+  { url: '/models/octagram-star/Obj_DeliDebli_Star.fbx', name: 'OCTAGRAM STAR', pos: [3.45,.03,2.9], scale: 1, rot: -.58, style: 'octagramStar', originalColor: true },
+  // { url: '/models/octagram-star/Obj_DeliDebli_Star.fbx', name: 'OCTAGRAM STAR', pos: [4.05,.03,1.8], scale: 1, rot: .3, style: 'octagramStar', originalColor: true },
   { url: '/models/tv/Obj_StaffRollTV.fbx', name: 'STAFF CREDITS TV', pos: [2.75,.03,2.2], scale: 2.9, rot: Math.PI, style: 'tv' },
   { url: '/models/little-salmon/scene.gltf', name: 'SMALLFRY', pos: [2.4,1.9,1.9], scale: .78, rot: Math.PI * .85, format: 'gltf' },
   { url: '/models/marinas-laptop.glb', name: "MARINA'S LAPTOP", pos: [-5.05,1.95,-1.35], scale: 1.45, rot: Math.PI * 1.5, format: 'glb' },
@@ -352,6 +405,8 @@ function fitAndPlace(object, item) {
   const factor = item.scale / Math.max(size.x, size.y, size.z);
   // Preserve unit conversion already applied by format loaders (DAE commonly uses 0.01).
   object.scale.multiplyScalar(factor);
+  if (item.scaleX) object.scale.x *= item.scaleX;
+  if (item.scaleY) object.scale.y *= item.scaleY;
   if (item.rotX || item.standVertical) {
     const yaw = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), item.rot);
     const tilt = new THREE.Quaternion().setFromAxisAngle(
@@ -424,6 +479,12 @@ function fitAndPlace(object, item) {
     for (const material of materials) {
       if (!material) continue;
       const materialName = (material.name || '').toLowerCase();
+      if (item.style === 'photoFrame' && materialName.includes('material.001')) {
+        material.map = null;
+        material.color.set(0x49362f);
+        material.roughness = .58;
+        material.metalness = .04;
+      }
       if (item.style === 'sofa') {
         if (materialName.includes('sofa')) {
           // The couch atlas contains both fabric and wooden arms. Use the
@@ -460,11 +521,11 @@ function fitAndPlace(object, item) {
       }
       if (item.style === 'tv' && !materialName.includes('screen')) {
         material.map = null;
-        material.color.set(0x54434d);
+        material.color.set(0x685b78);
         material.roughness = .56;
         material.metalness = .06;
       } else if (item.style === 'tv' && materialName.includes('screen')) {
-        material.color.set(0xf1e8ef);
+        material.color.set(0xe6d5e2);
         material.emissive.set(0x8c718e);
         material.emissiveIntensity = .55;
         material.roughness = .3;
@@ -484,6 +545,30 @@ function fitAndPlace(object, item) {
         }
       }
       if (item.originalColor && material.map) material.color.set(0xffffff);
+      if (item.style === 'subWeapon') {
+        const inkTint = new THREE.Color(item.tint);
+        const tintVector = `${inkTint.r.toFixed(3)}, ${inkTint.g.toFixed(3)}, ${inkTint.b.toFixed(3)}`;
+        const teamColorMap = item.teamMaps?.[materialName];
+        if (material.map && teamColorMap) {
+          material.color.set(0xffffff);
+          material.onBeforeCompile = shader => {
+            shader.uniforms.teamColorMap = { value: teamColorMap };
+            shader.fragmentShader = `uniform sampler2D teamColorMap;\n${shader.fragmentShader}`;
+            shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <map_fragment>',
+              `#ifdef USE_MAP
+                vec4 weaponTexel = texture2D(map, vMapUv);
+                float weaponLuma = dot(weaponTexel.rgb, vec3(0.299, 0.587, 0.114));
+                float teamMask = texture2D(teamColorMap, vMapUv).r;
+                vec3 inkColor = vec3(${tintVector}) * mix(0.52, 1.08, weaponLuma);
+                weaponTexel.rgb = mix(weaponTexel.rgb, inkColor, teamMask * 0.82);
+                diffuseColor *= weaponTexel;
+              #endif`
+            );
+          };
+          material.customProgramCacheKey = () => `sub-weapon-tcl-${item.tint.toString(16)}`;
+        }
+      }
       if (item.style === 'yellowTicket') {
         material.map = yellowTicketColorMap;
         material.normalMap = yellowTicketNormalMap;
@@ -494,6 +579,11 @@ function fitAndPlace(object, item) {
         material.emissiveMap = seaSnailEmissiveMap;
         material.emissive.set(0xffffff);
         material.emissiveIntensity = .2;
+      }
+      if (item.style === 'octagramStar') {
+        material.emissiveMap = octagramStarEmissiveMap;
+        material.emissive.set(0xffffff);
+        material.emissiveIntensity = .45;
       }
       if (item.style === 'newspaper') {
         material.alphaMap = newspaperAlphaMap;

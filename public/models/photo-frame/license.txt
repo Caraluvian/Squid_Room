@@ -1,0 +1,11 @@
+Model Information:
+* title:	Photo Frame
+* source:	https://sketchfab.com/3d-models/photo-frame-66faf3c1f1414b80a056507e87a62db6
+* author:	Alpha & Kayal (https://sketchfab.com/alpha_Arts)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Photo Frame" (https://sketchfab.com/3d-models/photo-frame-66faf3c1f1414b80a056507e87a62db6) by Alpha & Kayal (https://sketchfab.com/alpha_Arts) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
