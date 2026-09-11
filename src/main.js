@@ -268,6 +268,13 @@ const roomLights = [hemisphereLight, key, purpleLight, shelfLight, windowGlow, s
 const roomLightIntensities = roomLights.map(light => light.intensity);
 const roomLightSlider = document.querySelector('#roomLight');
 const roomLightValue = document.querySelector('#roomLightValue');
+const roomLightControl = document.querySelector('#roomLightControl');
+const roomLightToggle = document.querySelector('#roomLightToggle');
+roomLightToggle.addEventListener('click', () => {
+  const collapsed = roomLightControl.classList.toggle('collapsed');
+  roomLightToggle.setAttribute('aria-expanded', String(!collapsed));
+  roomLightToggle.setAttribute('aria-label', `${collapsed ? 'Show' : 'Hide'} room light control`);
+});
 roomLightSlider.addEventListener('input', () => {
   const level = Number(roomLightSlider.value);
   const scales = [
@@ -697,9 +704,10 @@ const musicPlay = document.querySelector('#musicPlay');
 const musicProgress = document.querySelector('#musicProgress');
 const musicCurrent = document.querySelector('#musicCurrent');
 const musicDuration = document.querySelector('#musicDuration');
+const musicTrackName = document.querySelector('#musicTrackName');
 const musicFavorites = document.querySelector('#musicFavorites');
 const audioPlayer = new Audio();
-audioPlayer.volume = Number(document.querySelector('#musicVolume').value);
+audioPlayer.volume = .7;
 const builtInTrackFiles = [
   ['Anarchy Rainbow', 'Anarchy Rainbow.mp3'],
   ['Anarchy Rainbow (Alt)', 'Anarchy Rainbow__.mp3'],
@@ -743,6 +751,9 @@ const builtInTracks = builtInTrackFiles.map(([name, file]) => ({
 let musicTracks = [...builtInTracks];
 let currentTrack = -1;
 let favoriteOnly = false;
+let playbackMode = 'list';
+let shuffleHistory = [];
+let shuffleHistoryPosition = -1;
 let favoriteTrackNames = new Set();
 try {
   favoriteTrackNames = new Set(JSON.parse(localStorage.getItem('squid-room-favorite-tracks') || '[]'));
@@ -801,9 +812,15 @@ function updateTrackList() {
   });
 }
 
-function loadTrack(index, autoplay = false) {
+function loadTrack(index, autoplay = false, rememberShuffle = true) {
   if (!musicTracks.length) return;
   currentTrack = (index + musicTracks.length) % musicTracks.length;
+  musicTrackName.textContent = musicTracks[currentTrack].name;
+  if (playbackMode === 'random' && rememberShuffle) {
+    shuffleHistory = shuffleHistory.slice(0, shuffleHistoryPosition + 1);
+    shuffleHistory.push(currentTrack);
+    shuffleHistoryPosition = shuffleHistory.length - 1;
+  }
   audioPlayer.src = musicTracks[currentTrack].url;
   audioPlayer.load();
   updateTrackList();
@@ -817,6 +834,24 @@ function stepTrack(direction) {
     .filter(({ track }) => !favoriteOnly || favoriteTrackNames.has(track.name))
     .map(({ index }) => index);
   if (!playableIndexes.length) return;
+  if (playbackMode === 'random') {
+    if (direction < 0 && shuffleHistoryPosition > 0) {
+      shuffleHistoryPosition--;
+      loadTrack(shuffleHistory[shuffleHistoryPosition], true, false);
+      return;
+    }
+    if (direction > 0 && shuffleHistoryPosition < shuffleHistory.length - 1) {
+      shuffleHistoryPosition++;
+      loadTrack(shuffleHistory[shuffleHistoryPosition], true, false);
+      return;
+    }
+    const choices = playableIndexes.filter(index => index !== currentTrack);
+    const nextIndex = choices.length
+      ? choices[Math.floor(Math.random() * choices.length)]
+      : playableIndexes[0];
+    loadTrack(nextIndex, true);
+    return;
+  }
   const currentPosition = playableIndexes.indexOf(currentTrack);
   const nextPosition = currentPosition < 0
     ? 0
@@ -824,9 +859,20 @@ function stepTrack(direction) {
   loadTrack(playableIndexes[nextPosition], true);
 }
 
+function setPlaybackMode(mode) {
+  playbackMode = mode;
+  const random = mode === 'random';
+  document.querySelector('#playInOrder').classList.toggle('active', !random);
+  document.querySelector('#playInOrder').setAttribute('aria-pressed', String(!random));
+  document.querySelector('#playRandom').classList.toggle('active', random);
+  document.querySelector('#playRandom').setAttribute('aria-pressed', String(random));
+  shuffleHistory = random && currentTrack >= 0 ? [currentTrack] : [];
+  shuffleHistoryPosition = shuffleHistory.length - 1;
+}
+
 function setPlayerState() {
   const playing = !audioPlayer.paused && !audioPlayer.ended;
-  musicPlay.textContent = playing ? '❚❚' : '▶';
+  musicPlay.classList.toggle('is-playing', playing);
   musicPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
   musicPanel.classList.toggle('playing', playing);
 }
@@ -850,6 +896,8 @@ musicPlay.addEventListener('click', () => {
 });
 document.querySelector('#musicPrevious').addEventListener('click', () => stepTrack(-1));
 document.querySelector('#musicNext').addEventListener('click', () => stepTrack(1));
+document.querySelector('#playInOrder').addEventListener('click', () => setPlaybackMode('list'));
+document.querySelector('#playRandom').addEventListener('click', () => setPlaybackMode('random'));
 musicFavorites.addEventListener('click', () => {
   favoriteOnly = !favoriteOnly;
   musicFavorites.classList.toggle('active', favoriteOnly);
@@ -857,7 +905,6 @@ musicFavorites.addEventListener('click', () => {
   musicFavorites.textContent = `${favoriteOnly ? '♥' : '♡'} FAVORITES`;
   updateTrackList();
 });
-document.querySelector('#musicVolume').addEventListener('input', event => { audioPlayer.volume = Number(event.target.value); });
 document.querySelector('#musicClose').addEventListener('click', () => {
   musicPanel.classList.remove('open');
   musicPanel.setAttribute('aria-hidden', 'true');
@@ -874,6 +921,24 @@ audioPlayer.addEventListener('timeupdate', () => {
 audioPlayer.addEventListener('play', setPlayerState);
 audioPlayer.addEventListener('pause', setPlayerState);
 audioPlayer.addEventListener('ended', () => stepTrack(1));
+addEventListener('keydown', event => {
+  if (!musicPanel.classList.contains('open') || /INPUT|TEXTAREA/.test(event.target.tagName)) return;
+  if (event.code === 'Space') {
+    event.preventDefault();
+    if (audioPlayer.paused) audioPlayer.play().catch(() => {});
+    else audioPlayer.pause();
+  } else if (event.code === 'ArrowLeft') {
+    stepTrack(-1);
+  } else if (event.code === 'ArrowRight') {
+    stepTrack(1);
+  } else if (event.code === 'ArrowUp') {
+    event.preventDefault();
+    audioPlayer.volume = Math.min(1, audioPlayer.volume + .05);
+  } else if (event.code === 'ArrowDown') {
+    event.preventDefault();
+    audioPlayer.volume = Math.max(0, audioPlayer.volume - .05);
+  }
+});
 updateTrackList();
 loadTrack(0);
 
